@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
           {/* Navbar */}
           <nav className="navbar">
             <div className="logo">
-              <span>microo!</span>
+              <span>microo! <sub>(beta)</sub></span>
             </div>
 
             {/* Hamburger Menu */}

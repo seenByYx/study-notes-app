@@ -182,7 +182,10 @@ body {
   font-size: 30px;
   color: #f4b400;
 }
+.logo sub {
+  font-size: small
 
+}
 /* Mobile Styles */
 @media (max-width: 768px) {
   .logo {
