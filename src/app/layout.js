@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import Head from "next/head"; // Import Head for adding AdSense script
+import Head from "next/head"; // Import Head for Next.js
 import "./globals.css";
 
 export default function RootLayout({ children }) {
@@ -13,15 +13,21 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <Head>
-        {/* Google AdSense Script */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
-          crossOrigin="anonymous"
-        ></script>
-      </Head>
       <body>
+        <Head>
+          <title>microo!</title>
+          <meta
+            name="description"
+            content="Your one-stop destination for study notes and micro-bits PDFs."
+          />
+          {/* Google AdSense Script */}
+          <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6137752235774964"
+            crossOrigin="anonymous"
+          ></script>
+        </Head>
+
         {/* Navbar */}
         <nav className="navbar">
           <div className="logo">
