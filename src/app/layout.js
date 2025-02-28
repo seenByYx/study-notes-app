@@ -21,7 +21,6 @@ export default function RootLayout({ children }) {
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6137752235774964"
           crossOrigin="anonymous"
-          strategy="beforeInteractive" // Ensures script loads before page content
         />
       </head>
       <body>

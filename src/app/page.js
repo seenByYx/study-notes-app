@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import AdComponent from "../components/AdComponent"; // Import the AdComponent
 
 const courses = [
   { name: "Biology", path: "/classes/class11/bio" },
@@ -28,7 +27,7 @@ export default function Home() {
   return (
     <div className="page">
       <div className="content1">
-        <p>Your one-stop destination for study notes and micro-bits PDFs.</p>
+        <p>Your one-stop destination for study notes and micro-bits PDFs. Explore our vast collection of free Micro Bit PDFs and handwritten notes for 11th ,12th Calicut univerity students and its Perfect for beginners, Download now and start</p>
 
         <div className="search-bar">
           <input
@@ -38,9 +37,6 @@ export default function Home() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-
-        {/* AdComponent */}
-        <AdComponent />
 
         {searchQuery && (
           <div className="search-results">

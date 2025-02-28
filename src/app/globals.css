@@ -5,13 +5,21 @@
   box-sizing: border-box;
 }
 
+@font-face {
+  font-family: 'MyCustomFont';
+  src: url('/fonts/Old Typewriter2.0.ttf') format('truetype'),
+       url('/fonts/Starjedi.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Body */
 body {
   margin: 0;
   padding: 5px;
   padding-top: 90px;
   color: #fff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
   background-color: #121212; /* Dark background */
@@ -177,7 +185,7 @@ body {
 }
 
 .logo span {
-  font-family: Copperplate, Papyrus, fantasy;
+  font-family:'MyCustomFont',Starjedi ;
   text-transform: lowercase;
   font-size: 30px;
   color: #f4b400;

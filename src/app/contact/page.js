@@ -21,7 +21,7 @@ export default function ContactPage() {
             <img src="/images/person2.jpg" alt="Person 2" className={styles.profileImage} />
             <h2>Yaseen</h2>
             <p>Developer</p>
-            <a href="mailto:jane.smith@example.com" className={styles.contactLink}>Email Yaseen</a>
+            <a href="yxseen.email@gmail.com" className={styles.contactLink}>Email Yaseen</a>
           </div>
 
           {/* Person 3 */}
