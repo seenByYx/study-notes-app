@@ -33,7 +33,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #555;
-  border-radius: 8x;
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -138,47 +138,50 @@ body {
   font-size: 2rem;
   color: white;
   cursor: pointer;
-  position: fixed;
   top: 15px;
   left: 15px;
   z-index: 101;
 }
 
-/* Mobile Styles */
+
+/* Mobile Menu (Hidden by default) */
 @media (max-width: 768px) {
   .hamburger {
-    display:contents; /* Show on small screens */
-  }
-
-  .navbar {
-    width: 100%;
-    height: 60px;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    transform: translateX(-100%);
-  }
-
-  .navbar.open {
-    transform: translateX(0);
+    display: block; /* Show the menu button */
   }
 
   .nav-links {
     position: fixed;
-    top: 60px;
-    left: 0;
-    width: 250px;
-    height: calc(100vh - 60px);
-    background: #1a1a1a;
+    color: #DCDCDC;
+    top: 0;
+    right: -100%;
+    width: 60%;
+    height: 100vh;
+    background: rgb(24, 24, 24); /* Matte Black with transparency */
+    box-shadow: 2px 0 10px rgba(255, 255, 255, 0.2);
     flex-direction: column;
-    padding: 20px;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+    align-items: center;
+    justify-content: center;
+    transition: right 0.3s ease-in-out;
   }
 
-  .nav-links.open {
-    transform: translateX(0);
+  .nav-links.show {
+  right: 0;
+  background: #2a2a2a;
+  }
+
+  .nav-links li {
+    margin: 15px 0;
+  }
+
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 5;
   }
 }
 /* Logo */
@@ -405,12 +408,9 @@ input:focus, textarea:focus {
     justify-content: space-between;
     align-items: center;
     background: #1a1a1a; /* Dark Navbar */
+    box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.3);
     z-index: 1000;
-    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
-  }
-
-  .hamburger {
-    visibility: hidden;
+    color: #fff;
   }
 
   .search-bar {
@@ -464,10 +464,11 @@ input:focus, textarea:focus {
     left: -250px;
     width: 200px;
     height: 100vh;
-    background: #1a1a1a; /* Dark Sidebar */
+    background: #222; 
     flex-direction: column;
     padding-top: 80px;
     transition: left 0.3s ease-in-out;
+    color: white;
   }
 
   .nav-links a {
@@ -476,9 +477,10 @@ input:focus, textarea:focus {
     font-size: 1.3rem;
   }
 
-  .menu-checkbox:checked ~ .nav-links {
-    left: 0;
-  }
+.nav-links.show {
+  left: 0;
+}
+
 }
 
 

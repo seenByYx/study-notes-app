@@ -34,19 +34,23 @@ export default function RootLayout({ children }) {
 
           {/* Hamburger Menu */}
           <div className="hamburger" onClick={toggleMenu}>
-            &#9776;
+            {isMenuOpen ? "✖" : "☰"} {/* Changes icon when menu is open */}
           </div>
 
+          {/* Overlay when menu is open */}
+          {isMenuOpen && <div className="menu-overlay" onClick={toggleMenu}></div>}
+
           {/* Nav Links */}
-          <ul className={`nav-links ${isMenuOpen ? "open" : ""}`}>
+          <ul className={`nav-links ${isMenuOpen ? "show" : ""}`}>
+
             <li>
-              <Link href="/">Home</Link>
+              <Link href="/" onClick={toggleMenu}>Home</Link>
             </li>
             <li>
-              <Link href="/about">About</Link>
+              <Link href="/about" onClick={toggleMenu}>About</Link>
             </li>
             <li>
-              <Link href="/contact">Contact</Link>
+              <Link href="/contact" onClick={toggleMenu}>Contact</Link>
             </li>
           </ul>
         </nav>
@@ -67,15 +71,9 @@ export default function RootLayout({ children }) {
             <div className="footer-section">
               <h4>Follow Us</h4>
               <div className="social-icons">
-                <a href="#" target="_blank" rel="noopener noreferrer">
-                  Telegram
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer">
-                  Twitter
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer">
-                  Instagram
-                </a>
+                <a href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
+                <a href="#" target="_blank" rel="noopener noreferrer">Twitter</a>
+                <a href="#" target="_blank" rel="noopener noreferrer">Instagram</a>
               </div>
             </div>
 

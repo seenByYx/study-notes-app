@@ -10,6 +10,7 @@ const courses = [
   { name: "Humanities", path: "/classes/class11/humanities" },
   { name: "Biology", path: "/classes/class12/bio" },
   { name: "Computer Science", path: "/classes/class12/cs" },
+  { name: "Physics", path: "/classes/class12/physics" },
   { name: "Commerce", path: "/classes/class12/commerce" },
   { name: "Humanities", path: "/classes/class12/humanities" },
   { name: "BSc Computer Science", path: "/courses/bscCs" },
