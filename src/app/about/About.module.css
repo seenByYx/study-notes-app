@@ -1,75 +1,77 @@
 .aboutSection {
-    background-color: #f4f4f9;
-    padding: 50px 0;
-  }
-  
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    text-align: center;
-  }
-  
-  .aboutSection h1 {
-    font-size: 2.5rem;
-    color: #333;
-  }
-  
-  .aboutSection p {
-    font-size: 1.2rem;
-    color: #555;
-    margin-bottom: 40px;
-  }
-  
+  background-color: #181818; /* Matte Black Background */
+  padding: 50px 0;
+  color: #DCDCDC; /* Ash White Text */
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.aboutSection h1 {
+  font-size: 2.5rem;
+  color: #2ECC71; /* Emerald Green */
+}
+
+.aboutSection p {
+  font-size: 1.2rem;
+  color: #DCDCDC;
+  margin-bottom: 40px;
+}
+
+.team {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+.member {
+  background-color: #222; /* Slightly Lighter Matte Black */
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(26, 188, 156, 0.2); /* Teal Blue Shadow */
+  width: 250px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.member:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 25px rgba(116, 185, 255, 0.5); /* Sky Blue Hover */
+}
+
+.profileImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 20px;
+  border: 3px solid #2ECC71; /* Emerald Green Border */
+}
+
+.teamMemberTitle {
+  font-size: 1.5rem;
+  color: #1ABC9C; /* Teal Blue */
+  margin-bottom: 10px;
+}
+
+.memberDescription {
+  font-size: 1rem;
+  color: #DCDCDC;
+}
+
+@media (max-width: 768px) {
   .team {
-    display: flex;
-    justify-content: center;
-    gap: 50px;
-    flex-wrap: wrap;
-  }
-  
-  .member {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    width: 250px;
-    text-align: center;
-    transition: transform 0.3s ease;
-  }
-  
-  .member:hover {
-    transform: translateY(-10px);
-  }
-  
-  .profileImage {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 20px;
-  }
-  
-  .teamMemberTitle {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
-  .memberDescription {
-    font-size: 1rem;
-    color: #777;
-  }
-  
-  @media (max-width: 768px) {
-    .team {
       flex-direction: column;
       align-items: center;
-    }
-  
-    .member {
+  }
+
+  .member {
       width: 80%;
       margin-bottom: 30px;
-    }
   }
-  
+}

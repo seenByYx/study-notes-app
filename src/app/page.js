@@ -27,7 +27,12 @@ export default function Home() {
   return (
     <div className="page">
       <div className="content1">
-        <p>Your one-stop destination for study notes and micro-bits PDFs. Explore our vast collection of free Micro Bit PDFs and handwritten notes for 11th ,12th Calicut univerity students and its Perfect for beginners, Download now and start</p>
+        <p>
+          Your one-stop destination for study notes and micro-bits PDFs. Explore
+          our vast collection of free Micro Bit PDFs and handwritten notes for
+          11th, 12th Calicut university students. It's perfect for beginners.
+          Download now and start!
+        </p>
 
         <div className="search-bar">
           <input
@@ -56,25 +61,35 @@ export default function Home() {
         <div className="classes">
           <div className="class-group">
             <h3>Class 11</h3>
-            <Link href="/classes/class11/bio">Biology</Link>
-            <Link href="/classes/class11/cs">Computer Science</Link>
-            <Link href="/classes/class11/commerce">Commerce</Link>
-            <Link href="/classes/class11/humanities">Humanities</Link>
+            <div className="scroll-box">
+              <Link href="/classes/class11/bio">Biology</Link>
+              <Link href="/classes/class11/cs">Computer Science</Link>
+              <Link href="/classes/class11/physics">Physics</Link>
+              <Link href="/classes/class11/maths">Mathematics</Link>
+              <Link href="/classes/class11/commerce">Commerce</Link>
+              <Link href="/classes/class11/humanities">Humanities</Link>
+            </div>
           </div>
 
           <div className="class-group">
             <h3>Class 12</h3>
+            <div className="scroll-box">
             <Link href="/classes/class12/bio">Biology</Link>
-            <Link href="/classes/class12/cs">Computer Science</Link>
-            <Link href="/classes/class12/commerce">Commerce</Link>
-            <Link href="/classes/class12/humanities">Humanities</Link>
+              <Link href="/classes/class12/cs">Computer Science</Link>
+              <Link href="/classes/class12/physics">Physics</Link>
+              <Link href="/classes/class12/maths">Mathematics</Link>
+              <Link href="/classes/class12/commerce">Commerce</Link>
+              <Link href="/classes/class12/humanities">Humanities</Link>
+            </div>
           </div>
 
           <div className="class-group">
             <h3>UG Courses</h3>
-            <Link href="/courses/bscCs">BSc Computer Science</Link>
-            <Link href="/courses/bca">BCA</Link>
-            <Link href="/courses/economics">Economics</Link>
+            <div className="scroll-box">
+              <Link href="/courses/bscCs">BSc Computer Science</Link>
+              <Link href="/courses/bca">BCA</Link>
+              <Link href="/courses/economics">Economics</Link>
+            </div>
           </div>
         </div>
       </div>
