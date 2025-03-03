@@ -108,9 +108,17 @@ body {
   padding: 0;
   margin-top: 20px;
 }
+.links {
+  display: grid;
+  place-items: center; /* Centers horizontally & vertically */
+  width: 100%;
+}
 
 .nav-links li {
-  padding: 12px 0;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Adds space between icon and text */
 }
 
 .nav-links a {
@@ -118,13 +126,24 @@ body {
   text-decoration: none;
   font-weight: 500;
   font-size: 1.3rem;
-  transition: color 0.3s ease, transform 0.3s ease;
+  display: flex;
   align-items: center;
+  gap: 8px;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
+/* Icon Styling */
+.nav-icon {
+  font-size: 20px;
+  color: #DCDCDC
+}
+.nav-icon :hover{
+  color: #2ECC71;
+
+}
 
 .nav-links a.active {
-  color: #74B9FF; /* Sky Blue */
+  color: #74B9FF;
 }
 
 .nav-links a:hover {
@@ -143,21 +162,19 @@ body {
   z-index: 101;
 }
 
-
-/* Mobile Menu (Hidden by default) */
+/* Mobile Menu */
 @media (max-width: 768px) {
   .hamburger {
-    display: block; /* Show the menu button */
+    display: block;
   }
 
   .nav-links {
     position: fixed;
-    color: #DCDCDC;
     top: 0;
     right: -100%;
     width: 60%;
     height: 100vh;
-    background: rgb(24, 24, 24); /* Matte Black with transparency */
+    background: #2a2a2a;
     box-shadow: 2px 0 10px rgba(255, 255, 255, 0.2);
     flex-direction: column;
     align-items: center;
@@ -166,8 +183,7 @@ body {
   }
 
   .nav-links.show {
-  right: 0;
-  background: #2a2a2a;
+    right: 0;
   }
 
   .nav-links li {
@@ -184,6 +200,7 @@ body {
     z-index: 5;
   }
 }
+
 /* Logo */
 .logo {
   text-align: center;
@@ -191,15 +208,16 @@ body {
 }
 
 .logo span {
-  font-family:'MyCustomFont',Starjedi ;
+  font-family: 'MyCustomFont', Starjedi;
   text-transform: lowercase;
   font-size: 30px;
   color: #2ECC71;
 }
-.logo sub {
-  font-size: small
 
+.logo sub {
+  font-size: small;
 }
+
 /* Mobile Styles */
 @media (max-width: 768px) {
   .logo {

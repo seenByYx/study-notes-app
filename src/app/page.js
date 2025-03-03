@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import RecentUploads from "../components/RecentUploads";
 
 const courses = [
   { name: "Biology", path: "/classes/class11/bio" },
   { name: "Computer Science", path: "/classes/class11/cs" },
   { name: "Commerce", path: "/classes/class11/commerce" },
   { name: "Humanities", path: "/classes/class11/humanities" },
-  { name: "Biology", path: "/classes/class12/bio" },
+
   { name: "Computer Science", path: "/classes/class12/cs" },
   { name: "Physics", path: "/classes/class12/physics" },
   { name: "Commerce", path: "/classes/class12/commerce" },
@@ -27,6 +28,7 @@ export default function Home() {
 
   return (
     <div className="page">
+
       <div className="content1">
         <p>
           Your one-stop destination for study notes and micro-bits PDFs. Explore
@@ -56,10 +58,12 @@ export default function Home() {
             ) : (
               <p>No results found for "{searchQuery}"</p>
             )}
+            
           </div>
         )}
 
         <div className="classes">
+        <RecentUploads />
           <div className="class-group">
             <h3>Class 11</h3>
             <div className="scroll-box">
@@ -75,12 +79,14 @@ export default function Home() {
           <div className="class-group">
             <h3>Class 12</h3>
             <div className="scroll-box">
-            <Link href="/classes/class12/bio">Biology</Link>
+             <Link href="/classes/class12/bio">Biology</Link>
               <Link href="/classes/class12/cs">Computer Science</Link>
               <Link href="/classes/class12/physics">Physics</Link>
+              <Link href="/classes/class12/chemistry">Chemistry</Link>
               <Link href="/classes/class12/maths">Mathematics</Link>
               <Link href="/classes/class12/commerce">Commerce</Link>
               <Link href="/classes/class12/humanities">Humanities</Link>
+              
             </div>
           </div>
 

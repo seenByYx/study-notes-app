@@ -2,14 +2,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import Script from "next/script";
+import { AiFillHome, AiOutlineInfoCircle, AiFillPhone } from "react-icons/ai";
+import { FaTelegramPlane, FaTwitter, FaInstagram } from "react-icons/fa";
 import "./globals.css";
 
 export default function RootLayout({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
     <html lang="en">
@@ -34,7 +33,7 @@ export default function RootLayout({ children }) {
 
           {/* Hamburger Menu */}
           <div className="hamburger" onClick={toggleMenu}>
-            {isMenuOpen ? "✖" : "☰"} {/* Changes icon when menu is open */}
+            {isMenuOpen ? "✖" : "☰"}
           </div>
 
           {/* Overlay when menu is open */}
@@ -42,20 +41,27 @@ export default function RootLayout({ children }) {
 
           {/* Nav Links */}
           <ul className={`nav-links ${isMenuOpen ? "show" : ""}`}>
-
-            <li>
-              <Link href="/" onClick={toggleMenu}>Home</Link>
-            </li>
-            <li>
-              <Link href="/about" onClick={toggleMenu}>About</Link>
-            </li>
-            <li>
-              <Link href="/contact" onClick={toggleMenu}>Contact</Link>
-            </li>
+            <div className="links">
+              <li>
+                <Link href="/" onClick={toggleMenu}>
+                  <AiFillHome className="nav-icon" /> Home
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" onClick={toggleMenu}>
+                  <AiOutlineInfoCircle className="nav-icon" /> About
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" onClick={toggleMenu}>
+                  <AiFillPhone className="nav-icon" /> Contact
+                </Link>
+              </li>
+            </div>
           </ul>
         </nav>
 
-        {/* Content Area */}
+        {/* Content */}
         <div className="content">{children}</div>
 
         {/* Footer */}
@@ -63,17 +69,29 @@ export default function RootLayout({ children }) {
           <div className="footer-content">
             <div className="footer-section">
               <h4>Quick Links</h4>
-              <Link href="/">Home</Link>
-              <Link href="/about">About</Link>
-              <Link href="/contact">Contact</Link>
+              <Link href="/">
+                <AiFillHome className="footer-icon" /> Home
+              </Link>
+              <Link href="/about">
+                <AiOutlineInfoCircle className="footer-icon" /> About
+              </Link>
+              <Link href="/contact">
+                <AiFillPhone className="footer-icon" /> Contact
+              </Link>
             </div>
 
             <div className="footer-section">
               <h4>Follow Us</h4>
               <div className="social-icons">
-                <a href="#" target="_blank" rel="noopener noreferrer">Telegram</a>
-                <a href="#" target="_blank" rel="noopener noreferrer">Twitter</a>
-                <a href="#" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <a href="#" target="_blank" rel="noopener noreferrer">
+                  <FaTelegramPlane className="footer-icon" /> Telegram
+                </a>
+                <a href="#" target="_blank" rel="noopener noreferrer">
+                  <FaTwitter className="footer-icon" /> Twitter
+                </a>
+                <a href="#" target="_blank" rel="noopener noreferrer">
+                  <FaInstagram className="footer-icon" /> Instagram
+                </a>
               </div>
             </div>
 

@@ -1,0 +1,38 @@
+.recentUploads {
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+  max-width: 500px;
+}
+
+.recentUploads h2 {
+  color: #2ECC71; /* Emerald Green */
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.recentUploads ul {
+  list-style: none;
+  padding: 0;
+}
+
+.recentUploads li {
+  background: #333;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  transition: transform 0.2s ease;
+}
+
+.recentUploads li:hover {
+  transform: scale(1.05);
+  background: #2a2a2a;
+}
+
+.recentUploads a {
+  color: #74B9FF; /* Sky Blue */
+  text-decoration: none;
+  font-weight: bold;
+}
