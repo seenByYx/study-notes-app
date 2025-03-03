@@ -180,6 +180,7 @@ body {
     align-items: center;
     justify-content: center;
     transition: right 0.3s ease-in-out;
+    z-index: 10;
   }
 
   .nav-links.show {
