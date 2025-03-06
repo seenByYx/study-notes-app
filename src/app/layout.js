@@ -1,26 +1,46 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Script from "next/script";
 import { AiFillHome, AiOutlineInfoCircle, AiFillPhone } from "react-icons/ai";
 import { FaTelegramPlane, FaTwitter, FaInstagram } from "react-icons/fa";
-import "./globals.css";
+import "./globals.css"; // Ensure this imports your CSS variables
 
 export default function RootLayout({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Load theme preference from localStorage on initial render
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      setIsDarkMode(false);
+      document.documentElement.classList.add("light");
+    } else {
+      setIsDarkMode(true);
+      document.documentElement.classList.remove("light");
+    }
+  }, []);
+
+  // Toggle between dark and light modes
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    localStorage.setItem("theme", newTheme ? "dark" : "light");
+    document.documentElement.classList.toggle("light", newTheme);
+  };
+
+  // Toggle mobile menu
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <html lang="en">
+    <html lang="en" className={isDarkMode ? "" : "light"}>
       <head>
-        <meta name="google-site-verification" content="ca-pub-6137752235774964" />
-        <meta name="google-adsense-account" content="ca-pub-6137752235774964" />
+        <meta name="google-site-verification" content="ca-pub-6137752235774964"></meta>
+        <meta name="google-adsense-account" content="ca-pub-6137752235774964"></meta>
         <title>microo!</title>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6137752235774964"
-          crossOrigin="anonymous"
-        />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6137752235774964"
+     crossorigin="anonymous"></script>
       </head>
       <body>
         {/* Navbar */}
@@ -30,6 +50,11 @@ export default function RootLayout({ children }) {
               microo! <sub>(beta)</sub>
             </span>
           </div>
+
+          {/* Theme Toggle Button */}
+          <button onClick={toggleTheme} className="theme-toggle">
+            {isDarkMode ? "☀️" : "🌙"}
+          </button>
 
           {/* Hamburger Menu */}
           <div className="hamburger" onClick={toggleMenu}>

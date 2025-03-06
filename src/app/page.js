@@ -63,7 +63,7 @@ export default function Home() {
         )}
 
         <div className="classes">
-        <RecentUploads />
+       {/*<RecentUploads />*/}
           <div className="class-group">
             <h3>Class 11</h3>
             <div className="scroll-box">
