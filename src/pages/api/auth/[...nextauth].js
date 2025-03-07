@@ -1,28 +1,48 @@
 import NextAuth from "next-auth";
-import EmailProvider from "next-auth/providers/email";
-import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
-import clientPromise from "../../../lib/mongodb";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { connectToDB } from "../../../lib/mongodb";
+import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 
-export default NextAuth({
+export const authOptions = {
   providers: [
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
-      from: process.env.EMAIL_FROM,
+      async authorize(credentials) {
+        const db = await connectToDB();
+        const user = await db.collection("users").findOne({ email: credentials.email });
+
+        if (!user) throw new Error("User not found");
+
+        const isValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isValid) throw new Error("Invalid credentials");
+
+        return { id: user._id.toString(), email: user.email, role: user.role };
+      },
     }),
   ],
-  adapter: MongoDBAdapter(clientPromise), // Add MongoDB adapter
+  callbacks: {
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+      }
+      return token;
+    },
+  },
   secret: process.env.NEXTAUTH_SECRET,
-  session: {
-    strategy: "jwt", // Use JWT for session management
-  },
-  pages: {
-    signIn: "/auth/signin", // Custom sign-in page (optional)
-  },
-});
+  session: { strategy: "jwt" },
+};
+
+export default NextAuth(authOptions);

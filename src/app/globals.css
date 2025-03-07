@@ -159,6 +159,12 @@ body {
   z-index: 101;
 }
 
+.theme-toggle {
+  background-color: #2e86c100;
+}
+.theme-toggle:hover {
+  background-color:#00000010
+}
 /* Mobile Menu */
 @media (max-width: 768px) {
   .hamburger {

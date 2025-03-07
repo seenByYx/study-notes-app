@@ -1,48 +1,48 @@
 "use client";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  const handleSignIn = async () => {
-    if (!email) {
-      alert("Please enter your email.");
-      return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
+
+    if (result?.error) {
+      alert("Invalid credentials");
+    } else {
+      router.push("/");
     }
-    await signIn("email", { email });
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Sign In</h1>
-      <input
-        type="email"
-        placeholder="Enter your email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{
-          padding: "10px",
-          margin: "10px 0",
-          width: "300px",
-          borderRadius: "5px",
-          border: "1px solid #ccc",
-        }}
-      />
-      <br />
-      <button
-        onClick={handleSignIn}
-        style={{
-          padding: "10px 20px",
-          background: "#2ECC71",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        Sign In with Email
-      </button>
+    <div className="signin-container">
+      <h2>Sign In</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Sign In</button>
+      </form>
     </div>
   );
 }
