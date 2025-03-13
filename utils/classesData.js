@@ -46,19 +46,18 @@ export const classes = {
         name: "cs",
         notes: {
           pdfs: [
-            { name: "Python Basics", file: "python-basics.pdf" },
-            { name: "Data Structures", file: "data-structures.pdf" },
+          
           ],
           images: [
-            { name: "Binary Tree Diagram", file: "binary-tree.jpg" },
+            
           ],
         },
         qPapers: {
           pdfs: [
-            { name: "CS Model Paper", file: "cs-model-paper.pdf" },
+          
           ],
           images: [
-            { name: "Sample Code Snippet", file: "sample-code.jpg" },
+           
           ],
         },
       },
@@ -72,19 +71,34 @@ export const classes = {
         name: "physics",
         notes: {
           pdfs: [
-            { name: "Electromagnetic Waves", file: "em-waves.pdf" },
-            { name: "Modern Physics", file: "modern-physics.pdf" },
           ],
           images: [
-            { name: "Wave Diagram", file: "wave-diagram.jpg" },
           ],
         },
         qPapers: {
           pdfs: [
             { name: "", file: "" },
           ],
+          images: [,
+          ],
+        },
+      },
+      {
+        name: "maths",
+        notes: {
+          pdfs: [ {name:"Plus Two Maths - Chapters 7 (eduport)", file:"MicroBit - Plus Two Maths - Chapters 7 (1).pdf"},
+             {name:"Plus Two Maths - Chapters 1,2,3,4,5,6 & 8 (eduport)", file:"MicroBit - Plus Two Maths - Chapter 1,2,3,4,5,6 & 8 (1).pdf"}
+          ],
           images: [
-            { name: "Exam Pattern Example", file: "exam-pattern.jpg" },
+            
+          ],
+        },
+        qPapers: {
+          pdfs: [
+           
+          ],
+          images: [
+           
           ],
         },
       },
@@ -92,19 +106,18 @@ export const classes = {
         name: "bio",
         notes: {
           pdfs: [
-            { name: "Genetics", file: "genetics.pdf" },
-            { name: "Human Physiology", file: "human-physiology.pdf" },
+        
           ],
           images: [
-            { name: "DNA Structure", file: "dna-structure.jpg" },
+            
           ],
         },
         qPapers: {
           pdfs: [
-            { name: "Class 12 Biology Question Paper", file: "class12-bio-qpaper.pdf" },
+           
           ],
           images: [
-            { name: "Sample Bio Diagrams", file: "sample-bio-diagrams.jpg" },
+           
           ],
         },
       },
@@ -112,19 +125,38 @@ export const classes = {
         name: "cs",
         notes: {
           pdfs: [
-            { name: "OOP Concepts", file: "oop-concepts.pdf" },
-            { name: "Databases & SQL", file: "databases-sql.pdf" },
+       
           ],
           images: [
-            { name: "ER Diagram", file: "er-diagram.jpg" },
+          
           ],
         },
         qPapers: {
           pdfs: [
-            { name: "CS Final Exam Paper", file: "cs-final-exam.pdf" },
+           
           ],
           images: [
-            { name: "Code Optimization Example", file: "code-optimization.jpg" },
+           
+          ],
+        },
+      },
+      {
+        name: "chemistry",
+        notes: {
+          pdfs: [
+            { name: "Chemistry Full Chapters Notes_1,2,3,4,5,6,7,8 (eduport)", file:"MicroBit_Plus_Two_Chemistry_Full_Chapters_Notes_1,2,3,4,5,6,7,8.pdf"  },
+            { name: "NAMED REACTIONS  WITH EQUATION", file:"6. NAMED REACTIONS  WITH EQUATION.pdf"}
+          ],
+          images: [
+            { name: "", file: "" },
+          ],
+        },
+        qPapers: {
+          pdfs: [
+            { name: "", file: "" },
+          ],
+          images: [
+            { name: "", file: "" },
           ],
         },
       },

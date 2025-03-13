@@ -12,7 +12,7 @@ export default function AboutPage() {
 
           <div className={styles.team}>
             <div className={styles.member}>
-              <img src="/images/yaseen.jpg" alt="Developer" className={styles.profileImage} />
+              <img src="/images/yasee.jpg" alt="Developer" className={styles.profileImage} />
               <h2 className={styles.teamMemberTitle}>Developer</h2>
 
               <p>I handle the technical side of the platform, ensuring smooth operation and user experience.</p>
