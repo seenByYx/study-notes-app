@@ -81,7 +81,7 @@ export const classes = {
         },
         qPapers: {
           pdfs: [
-            { name: "Model QP - March 2025", file: "Model  Q P -1 March 2025.pdf" },
+            { name: "", file: "" },
           ],
           images: [
             { name: "Exam Pattern Example", file: "exam-pattern.jpg" },

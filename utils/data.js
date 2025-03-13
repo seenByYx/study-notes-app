@@ -30,7 +30,10 @@ export const courses = {
           ] } ,
           { name: "Microprocesor",
             pdfs: [{name:"Microprocessor micro" ,file: "Microprocessor micro sem 3.pdf" , category: "micro"},
-                   {name:"" ,file: "" , category: ""}]
+                   {name:"microprocessor 2021" ,file: "mp april 2021.pdf" , category: "q-papers"},
+                   {name:"microprocessor 2022" ,file: "mP 2022.pdf" , category: "q-papers"},
+                   {name:"microprocessor 2023" ,file: "mp23.pdf" , category: "q-papers"},
+                  ]
           }
         ] ,
         

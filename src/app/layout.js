@@ -32,29 +32,27 @@ export default function RootLayout({ children }) {
             </span>
           </div>
 
-          {/* Hamburger Menu */}
-          <div className="hamburger" onClick={toggleMenu}>
-            {isMenuOpen ? "✖" : "☰"} {/* Changes icon when menu is open */}
-          </div>
+{/* Hamburger Menu */}
+<div className="hamburger" onClick={toggleMenu}>
+  {isMenuOpen ? "✖" : "☰"} {/* Changes icon when menu is open */}
+</div>
 
-          {/* Overlay when menu is open */}
-          {isMenuOpen && <div className="menu-overlay" onClick={toggleMenu}></div>}
+{/* Overlay when menu is open */}
+{isMenuOpen && <div className="menu-overlay" onClick={toggleMenu}></div>}
 
-          {/* Nav Links */}
-          <ul className={`nav-links ${isMenuOpen ? "show" : ""}`}>
-
-            <li>
-              <Link href="/" onClick={toggleMenu}>Home</Link>
-            </li>
-            <li>
-              <Link href="/about" onClick={toggleMenu}>About</Link>
-            </li>
-            <li>
-              <Link href="/contact" onClick={toggleMenu}>Contact</Link>
-            </li>
-          </ul>
-        </nav>
-
+{/* Nav Links */}
+<ul className={`nav-links ${isMenuOpen ? "show" : ""}`}>
+  <li>
+    <Link href="/" onClick={() => {toggleMenu();}}>Home</Link>  {/* toggleMenu only when clicked */}
+  </li>
+  <li>
+    <Link href="/about" onClick={() => {toggleMenu();}}>About</Link>
+  </li>
+  <li>
+    <Link href="/contact" onClick={() => {toggleMenu();}}>Contact</Link>
+  </li>
+</ul>
+</nav>
         {/* Content Area */}
         <div className="content">{children}</div>
 
