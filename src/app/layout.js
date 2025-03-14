@@ -50,6 +50,30 @@ export default function RootLayout({ children }) {
                 <span>microo! <sub>(beta)</sub></span>
               </div>
 
+<<<<<<< HEAD
+{/* Hamburger Menu */}
+<div className="hamburger" onClick={toggleMenu}>
+  {isMenuOpen ? "✖" : "☰"} {/* Changes icon when menu is open */}
+</div>
+
+{/* Overlay when menu is open */}
+{isMenuOpen && <div className="menu-overlay" onClick={toggleMenu}></div>}
+
+{/* Nav Links */}
+<ul className={`nav-links ${isMenuOpen ? "show" : ""}`}>
+  <li>
+    <Link href="/" onClick={() => {toggleMenu();}}>Home</Link>  {/* toggleMenu only when clicked */}
+  </li>
+  <li>
+    <Link href="/about" onClick={() => {toggleMenu();}}>About</Link>
+  </li>
+  <li>
+    <Link href="/contact" onClick={() => {toggleMenu();}}>Contact</Link>
+  </li>
+</ul>
+</nav>
+        {/* Content Area */}
+=======
               {/* Theme Toggle Button */}
               <button onClick={toggleTheme} className="theme-toggle">
                 {isDarkMode ? "☀️" : "🌙"}
@@ -95,6 +119,7 @@ export default function RootLayout({ children }) {
         )}
 
         {/* Main Content */}
+>>>>>>> 32b4e0aee3bea2242237b1992969bcf612b25ec3
         <div className="content">{children}</div>
 
         {/* Hide Footer on Signin/Signup pages */}
