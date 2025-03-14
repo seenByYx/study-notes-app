@@ -10,7 +10,7 @@ export default function ContactPage() {
         <div className={styles.team}>
           {/* Person 1 */}
           <div className={styles.teamMember}>
-            <img src="/images/person1.jpg" alt="Person 1" className={styles.profileImage} />
+            <img src="/images/wp5894291-minimalist-cyberpunk-wallpapers.jpg" alt="Person 1" className={styles.profileImage} />
             <h2>Shiyad EK</h2>
             <p>Content Specialist</p>
             <a href="mailto:john.doe@example.com" className={styles.contactLink}>Email Shiyad</a>
@@ -18,15 +18,15 @@ export default function ContactPage() {
 
           {/* Person 2 */}
           <div className={styles.teamMember}>
-            <img src="/images/person2.jpg" alt="Person 2" className={styles.profileImage} />
+            <img src="/images/9408fdd6-ceac-492c-ae79-1d0b65b858e6.jpg" alt="Person 2" className={styles.profileImage} />
             <h2>Yaseen</h2>
             <p>Developer</p>
-            <a href="yxseen.email@gmail.com" className={styles.contactLink}>Email Yaseen</a>
+            <a href="mailto:yxseen.email@gmail.com" className={styles.contactLink}>Email Yaseen</a>
           </div>
 
           {/* Person 3 */}
           <div className={styles.teamMember}>
-            <img src="/images/person3.jpg" alt="Person 3" className={styles.profileImage} />
+            <img src="/images/Lightning McQueen in Pixar Style Wallpaper backgrounds for iPhone, Desktop, PC, Laptop, Compute___.jpg" alt="Person 3" className={styles.profileImage} />
             <h2>Vishnu</h2>
             <p>Marketer</p>
             <a href="mailto:alex.johnson@example.com" className={styles.contactLink}>Email Vishnu</a>
