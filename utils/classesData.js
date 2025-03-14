@@ -6,19 +6,19 @@ export const classes = {
         name: "physics",
         notes: {
           pdfs: [
-            { name: "Kinematics", file: "kinematics.pdf" },
-            { name: "Newton's Laws", file: "newtons-laws.pdf" },
+            { name: "", file: "" },
+            { name: "", file: "" },
           ],
           images: [
-            { name: "Motion Diagram", file: "motion-diagram.jpg" },
+            { name: "", file: "" },
           ],
         },
         qPapers: {
           pdfs: [
-            { name: "Class 11 Physics Question Paper", file: "class11-physics-qpaper.pdf" },
+            { name: "", file: "" },
           ],
           images: [
-            { name: "Mock Test 1", file: "mock-test-1.jpg" },
+            { name: "", file: "" },
           ],
         },
       },
@@ -26,11 +26,11 @@ export const classes = {
         name: "bio",
         notes: {
           pdfs: [
-            { name: "Cell Structure", file: "cell-structure.pdf" },
-            { name: "Plant Physiology", file: "plant-physiology.pdf" },
+            { name: "", file: "" },
+            { name: "", file: "" },
           ],
           images: [
-            { name: "Microscope View", file: "microscope-view.jpg" },
+            { name: "", file: "" },
           ],
         },
         qPapers: {
