@@ -6,19 +6,18 @@ export const classes = {
         name: "physics",
         notes: {
           pdfs: [
-            { name: "", file: "" },
-            { name: "", file: "" },
+            {} 
           ],
           images: [
-            { name: "", file: "" },
+            { },
           ],
         },
         qPapers: {
           pdfs: [
-            { name: "", file: "" },
+            { },
           ],
           images: [
-            { name: "", file: "" },
+            { },
           ],
         },
       },
@@ -26,19 +25,19 @@ export const classes = {
         name: "bio",
         notes: {
           pdfs: [
-            { name: "", file: "" },
-            { name: "", file: "" },
+            {  },
+            {  },
           ],
           images: [
-            { name: "", file: "" },
+            {  },
           ],
         },
         qPapers: {
           pdfs: [
-            { name: "", file: "" },
+            { },
           ],
           images: [
-            { name: "", file: "" },
+            { },
           ],
         },
       },
