@@ -33,6 +33,20 @@
   font-size: 0.94rem;
 }
 
+.skeletonWrap {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.skeleton {
+  height: 52px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #eef2fa, #e5ebf7, #eef2fa);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+
 .list {
   list-style: none;
   margin: 16px 0 0;
@@ -136,6 +150,14 @@
   background: #912018;
 }
 
+.reportButton {
+  background: #475467;
+}
+
+.reportButton:hover {
+  background: #344054;
+}
+
 .error {
   color: #b03a2e;
   font-size: 0.9rem;
@@ -144,4 +166,13 @@
 .success {
   color: #117a65;
   font-size: 0.9rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

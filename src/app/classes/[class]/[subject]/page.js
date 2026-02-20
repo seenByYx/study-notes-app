@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import NotesBoard from "../../../../components/NotesBoard";
 import CommentsBoard from "../../../../components/CommentsBoard";
+import RequestNotesBoard from "../../../../components/RequestNotesBoard";
 import { catalog } from "../../../../../utils/catalog";
 
 export default function ClassSubjectPage() {
@@ -34,6 +35,12 @@ export default function ClassSubjectPage() {
       />
 
       <CommentsBoard
+        scope="class"
+        classKey={classKey}
+        subjectKey={subjectKey}
+      />
+
+      <RequestNotesBoard
         scope="class"
         classKey={classKey}
         subjectKey={subjectKey}
