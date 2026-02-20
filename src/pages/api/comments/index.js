@@ -41,10 +41,14 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       const session = await getServerSession(req, res, authOptions);
       const isModerator = canModerateComments(session);
-      const { scope, classKey, courseKey, semesterKey, subjectKey, limit, page, status, q } = req.query;
+      const { scope, classKey, courseKey, semesterKey, subjectKey, parentId, limit, page, status, q } = req.query;
 
       const requestedStatus = String(status || "active");
       const moderationQueue = requestedStatus === "reported";
+      const parentObjectId = parentId ? toObjectId(parentId) : null;
+      if (parentId && !parentObjectId) {
+        return res.status(400).json({ message: "Invalid parent comment id" });
+      }
 
       if (!moderationQueue || !isModerator) {
         const error = validateScope({ scope, classKey, courseKey, semesterKey, subjectKey });
@@ -59,6 +63,7 @@ export default async function handler(req, res) {
         query.courseKey = courseKey || null;
         query.semesterKey = semesterKey || null;
         query.status = "active";
+        query.parentId = parentObjectId || null;
       } else {
         query.status = "reported";
       }
@@ -87,9 +92,20 @@ export default async function handler(req, res) {
         return res.status(401).json({ message: "You must be signed in to comment." });
       }
 
-      const { text, scope, classKey, courseKey, semesterKey, subjectKey } = req.body || {};
+      const { text, scope, classKey, courseKey, semesterKey, subjectKey, parentId } = req.body || {};
       const error = validateScope({ scope, classKey, courseKey, semesterKey, subjectKey });
       if (error) return res.status(400).json({ message: error });
+      const parentObjectId = parentId ? toObjectId(parentId) : null;
+      if (parentId && !parentObjectId) {
+        return res.status(400).json({ message: "Invalid parent comment id" });
+      }
+      if (parentObjectId) {
+        const parentComment = await comments.findOne({ _id: parentObjectId, status: "active" });
+        if (!parentComment) return res.status(404).json({ message: "Parent comment not found" });
+        if (parentComment.parentId) {
+          return res.status(400).json({ message: "Reply depth exceeded" });
+        }
+      }
 
       const recentCount = await comments.countDocuments({
         createdById: session.user.id,
@@ -116,6 +132,7 @@ export default async function handler(req, res) {
         createdBy: session.user.name || session.user.email?.split("@")[0] || "User",
         createdByImage: session.user.image || null,
         createdById: session.user.id,
+        parentId: parentObjectId || null,
         status: "active",
         reportCount: 0,
         reportedBy: [],
@@ -178,7 +195,7 @@ export default async function handler(req, res) {
       const _id = toObjectId(id);
       if (!_id) return res.status(400).json({ message: "Invalid comment id." });
 
-      await comments.deleteOne({ _id });
+      await comments.deleteMany({ $or: [{ _id }, { parentId: _id }] });
       return res.status(200).json({ message: "Comment deleted." });
     }
 

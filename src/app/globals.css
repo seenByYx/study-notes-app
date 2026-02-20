@@ -332,6 +332,15 @@ button:hover {
   margin: 0;
 }
 
+.secondary-button {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.secondary-button:hover {
+  background: #d1d5db;
+}
+
 @keyframes fade-slide {
   from {
     opacity: 0;

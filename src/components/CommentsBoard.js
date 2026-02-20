@@ -32,6 +32,9 @@ export default function CommentsBoard({
   const { data: session } = useSession();
   const canModerate = session?.user?.role === "owner" || session?.user?.role === "admin";
   const [comments, setComments] = useState([]);
+  const [repliesByParent, setRepliesByParent] = useState({});
+  const [expandedParents, setExpandedParents] = useState({});
+  const [replyDrafts, setReplyDrafts] = useState({});
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -41,11 +44,16 @@ export default function CommentsBoard({
   const [text, setText] = useState("");
   const [query, setQuery] = useState("");
 
-  const baseQuery = useMemo(() => {
+  const buildScopeQuery = () => {
     const params = new URLSearchParams({ scope, subjectKey, limit: "10" });
     if (classKey) params.set("classKey", classKey);
     if (courseKey) params.set("courseKey", courseKey);
     if (semesterKey) params.set("semesterKey", semesterKey);
+    return params;
+  };
+
+  const baseQuery = useMemo(() => {
+    const params = buildScopeQuery();
     if (query.trim()) params.set("q", query.trim());
     return params;
   }, [scope, subjectKey, classKey, courseKey, semesterKey, query]);
@@ -75,11 +83,36 @@ export default function CommentsBoard({
     fetchPage({ nextPage: 1, append: false });
   }, [baseQuery.toString()]);
 
+  const loadReplies = async (parentId) => {
+    try {
+      const params = buildScopeQuery();
+      params.set("parentId", parentId);
+      params.set("limit", "25");
+      const res = await fetch(`/api/comments?${params.toString()}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load replies");
+      setRepliesByParent((prev) => ({ ...prev, [parentId]: data.comments || [] }));
+    } catch (replyError) {
+      setError(replyError.message);
+    }
+  };
+
+  const toggleReplies = async (parentId) => {
+    const isOpen = Boolean(expandedParents[parentId]);
+    if (isOpen) {
+      setExpandedParents((prev) => ({ ...prev, [parentId]: false }));
+      return;
+    }
+    setExpandedParents((prev) => ({ ...prev, [parentId]: true }));
+    if (!repliesByParent[parentId]) {
+      await loadReplies(parentId);
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     setMessage("");
-
     const optimistic = {
       _id: `tmp-${Date.now()}`,
       text,
@@ -87,6 +120,7 @@ export default function CommentsBoard({
       createdBy: session?.user?.name || "You",
       createdByImage: session?.user?.image || null,
       createdById: session?.user?.id || "local",
+      parentId: null,
     };
     setComments((prev) => [optimistic, ...prev]);
     setText("");
@@ -98,7 +132,6 @@ export default function CommentsBoard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to add comment");
       setMessage("Comment added.");
@@ -110,11 +143,40 @@ export default function CommentsBoard({
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleReplySubmit = async (parentId) => {
+    const replyText = String(replyDrafts[parentId] || "").trim();
+    if (!replyText) return;
     setError("");
     setMessage("");
-    const previous = comments;
-    setComments((prev) => prev.filter((item) => item._id !== id));
+    try {
+      const payload = {
+        text: replyText,
+        parentId,
+        scope,
+        classKey,
+        courseKey,
+        semesterKey,
+        subjectKey,
+      };
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to reply");
+      setReplyDrafts((prev) => ({ ...prev, [parentId]: "" }));
+      await loadReplies(parentId);
+      setExpandedParents((prev) => ({ ...prev, [parentId]: true }));
+      setMessage("Reply added.");
+    } catch (replyError) {
+      setError(replyError.message);
+    }
+  };
+
+  const handleDelete = async (id, parentId = "") => {
+    setError("");
+    setMessage("");
     try {
       const res = await fetch("/api/comments", {
         method: "DELETE",
@@ -123,9 +185,13 @@ export default function CommentsBoard({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to delete comment");
+      if (parentId) {
+        await loadReplies(parentId);
+      } else {
+        await fetchPage({ nextPage: 1, append: false });
+      }
       setMessage("Comment deleted.");
     } catch (deleteError) {
-      setComments(previous);
       setError(deleteError.message);
     }
   };
@@ -147,6 +213,68 @@ export default function CommentsBoard({
     }
   };
 
+  const renderComment = (comment, isReply = false, parentId = "") => (
+    <li
+      key={comment._id || `${comment.createdAt}-${comment.createdById}`}
+      className={`${styles.item} ${isReply ? styles.replyItem : ""}`}
+    >
+      <div className={styles.head}>
+        {comment.createdByImage ? (
+          <img className={styles.avatarImage} src={comment.createdByImage} alt={comment.createdBy || "User"} />
+        ) : (
+          <div className={styles.avatarFallback}>{getInitial(comment.createdBy)}</div>
+        )}
+        <div className={styles.meta}>
+          {formatDisplayName(comment.createdBy)} | {formatDate(comment.createdAt)}
+        </div>
+      </div>
+      <div className={styles.body}>{comment.text}</div>
+      <div className={styles.rowEnd}>
+        {!isReply && session?.user && (
+          <button type="button" className={styles.replyButton} onClick={() => toggleReplies(comment._id)}>
+            {expandedParents[comment._id] ? "Hide Replies" : "Reply"}
+          </button>
+        )}
+        {!canModerate && session?.user && (
+          <button type="button" className={styles.reportButton} onClick={() => handleReport(comment._id)}>
+            Report
+          </button>
+        )}
+        {canModerate && (
+          <button
+            type="button"
+            className={styles.deleteButton}
+            onClick={() => handleDelete(comment._id, parentId)}
+          >
+            Delete
+          </button>
+        )}
+      </div>
+
+      {!isReply && expandedParents[comment._id] && (
+        <div className={styles.repliesWrap}>
+          <ul className={styles.replyList}>
+            {(repliesByParent[comment._id] || []).map((reply) => renderComment(reply, true, comment._id))}
+          </ul>
+          {session?.user && (
+            <div className={styles.replyComposer}>
+              <input
+                placeholder="Write a reply..."
+                value={replyDrafts[comment._id] || ""}
+                onChange={(event) =>
+                  setReplyDrafts((prev) => ({ ...prev, [comment._id]: event.target.value }))
+                }
+              />
+              <button type="button" className={styles.replyButton} onClick={() => handleReplySubmit(comment._id)}>
+                Send
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </li>
+  );
+
   return (
     <section className={styles.panel}>
       <div className={styles.header}>
@@ -164,41 +292,16 @@ export default function CommentsBoard({
       )}
       {!loading && comments.length === 0 && <div className={styles.empty}>No comments yet.</div>}
 
-      {!loading && comments.length > 0 && (
-        <ul className={styles.list}>
-          {comments.map((comment) => (
-            <li key={comment._id || `${comment.createdAt}-${comment.createdById}`} className={styles.item}>
-              <div className={styles.head}>
-                {comment.createdByImage ? (
-                  <img className={styles.avatarImage} src={comment.createdByImage} alt={comment.createdBy || "User"} />
-                ) : (
-                  <div className={styles.avatarFallback}>{getInitial(comment.createdBy)}</div>
-                )}
-                <div className={styles.meta}>
-                  {formatDisplayName(comment.createdBy)} | {formatDate(comment.createdAt)}
-                </div>
-              </div>
-              <div className={styles.body}>{comment.text}</div>
-              <div className={styles.rowEnd}>
-                {!canModerate && session?.user && (
-                  <button type="button" className={styles.reportButton} onClick={() => handleReport(comment._id)}>
-                    Report
-                  </button>
-                )}
-                {canModerate && (
-                  <button type="button" className={styles.deleteButton} onClick={() => handleDelete(comment._id)}>
-                    Delete
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      {!loading && comments.length > 0 && <ul className={styles.list}>{comments.map((comment) => renderComment(comment))}</ul>}
 
       {!loading && hasMore && (
         <div className={styles.rowEnd}>
-          <button type="button" className={styles.reportButton} disabled={loadingMore} onClick={() => fetchPage({ nextPage: page + 1, append: true })}>
+          <button
+            type="button"
+            className={styles.reportButton}
+            disabled={loadingMore}
+            onClick={() => fetchPage({ nextPage: page + 1, append: true })}
+          >
             {loadingMore ? "Loading..." : "Load More"}
           </button>
         </div>

@@ -1,9 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import NotesBoard from "../../components/NotesBoard";
 import { catalog } from "../../../utils/catalog";
+
+function toSubjectKey(label) {
+  return String(label || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
 
 export default function UploadPage() {
   const { data: session } = useSession();
@@ -15,6 +24,8 @@ export default function UploadPage() {
   const [courseKey, setCourseKey] = useState("");
   const [semesterKey, setSemesterKey] = useState("");
   const [subjectKey, setSubjectKey] = useState("");
+  const [customSubjects, setCustomSubjects] = useState([]);
+  const [subjectMessage, setSubjectMessage] = useState("");
 
   const classOptions = useMemo(
     () => Object.entries(catalog.classes).map(([key, item]) => ({ key, label: item.label })),
@@ -33,13 +44,23 @@ export default function UploadPage() {
   }, [courseKey]);
 
   const subjectOptions = useMemo(() => {
+    const map = new Map();
+    const add = (item) => {
+      if (!item?.key) return;
+      if (!map.has(item.key)) map.set(item.key, item);
+    };
+
     if (scope === "class") {
       if (!classKey) return [];
-      return catalog.classes[classKey]?.subjects || [];
+      (catalog.classes[classKey]?.subjects || []).forEach(add);
+      customSubjects.forEach(add);
+      return Array.from(map.values());
     }
     if (!courseKey || !semesterKey) return [];
-    return catalog.courses[courseKey]?.semesters?.[semesterKey]?.subjects || [];
-  }, [scope, classKey, courseKey, semesterKey]);
+    (catalog.courses[courseKey]?.semesters?.[semesterKey]?.subjects || []).forEach(add);
+    customSubjects.forEach(add);
+    return Array.from(map.values());
+  }, [scope, classKey, courseKey, semesterKey, customSubjects]);
 
   const canOpenBoard =
     scope === "class"
@@ -67,6 +88,63 @@ export default function UploadPage() {
     setSemesterKey("");
     setSubjectKey("");
   };
+
+  const loadCustomSubjects = useCallback(async () => {
+    setCustomSubjects([]);
+    setSubjectMessage("");
+    try {
+      const params = new URLSearchParams({ scope });
+      if (scope === "class") {
+        if (!classKey) return;
+        params.set("classKey", classKey);
+      } else {
+        if (!courseKey || !semesterKey) return;
+        params.set("courseKey", courseKey);
+        params.set("semesterKey", semesterKey);
+      }
+      const res = await fetch(`/api/subjects?${params.toString()}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load subjects");
+      setCustomSubjects(data.subjects || []);
+    } catch (error) {
+      setSubjectMessage(error.message);
+    }
+  }, [scope, classKey, courseKey, semesterKey]);
+
+  const addSubject = async () => {
+    setSubjectMessage("");
+    const label = window.prompt("Enter subject name");
+    if (!label) return;
+    const key = toSubjectKey(label);
+    if (!key) {
+      setSubjectMessage("Invalid subject name.");
+      return;
+    }
+
+    try {
+      const payload =
+        scope === "class"
+          ? { scope, classKey, key, label: label.trim() }
+          : { scope, courseKey, semesterKey, key, label: label.trim() };
+      const res = await fetch("/api/subjects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to add subject");
+      setSubjectMessage("Subject added.");
+      await loadCustomSubjects();
+      setSubjectKey(key);
+    } catch (error) {
+      setSubjectMessage(error.message);
+    }
+  };
+
+  // Load custom subjects when destination changes.
+  useEffect(() => {
+    loadCustomSubjects();
+  }, [loadCustomSubjects]);
 
   if (!canManage) {
     return <p className="error-text">Only admin or owner can access uploads.</p>;
@@ -165,8 +243,22 @@ export default function UploadPage() {
           )}
         </div>
         {scope === "course" && courseKey && semesterKey && subjectOptions.length === 0 && (
-          <p className="muted">No subjects configured for this semester yet.</p>
+          <div className="row-between" style={{ marginTop: 10 }}>
+            <p className="muted" style={{ margin: 0 }}>No subjects configured for this semester yet.</p>
+            <button type="button" className="secondary-button" onClick={addSubject}>
+              + Add Subject
+            </button>
+          </div>
         )}
+        {scope === "class" && classKey && subjectOptions.length === 0 && (
+          <div className="row-between" style={{ marginTop: 10 }}>
+            <p className="muted" style={{ margin: 0 }}>No subjects configured for this class yet.</p>
+            <button type="button" className="secondary-button" onClick={addSubject}>
+              + Add Subject
+            </button>
+          </div>
+        )}
+        {subjectMessage && <p className="muted" style={{ marginTop: 8 }}>{subjectMessage}</p>}
       </section>
 
       {canOpenBoard ? (

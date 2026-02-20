@@ -140,6 +140,15 @@
 .rowEnd {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
+}
+
+.replyButton {
+  background: #0f766e;
+}
+
+.replyButton:hover {
+  background: #0b5d57;
 }
 
 .deleteButton {
@@ -156,6 +165,31 @@
 
 .reportButton:hover {
   background: #344054;
+}
+
+.repliesWrap {
+  margin-top: 8px;
+  border-left: 2px solid #d8deea;
+  padding-left: 10px;
+}
+
+.replyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.replyItem {
+  background: #f7f9fe;
+  border-color: #cfd9ef;
+}
+
+.replyComposer {
+  margin-top: 8px;
+  display: grid;
+  gap: 8px;
 }
 
 .error {
