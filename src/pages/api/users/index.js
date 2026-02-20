@@ -15,6 +15,10 @@ function isOwner(session) {
   return session?.user?.role === "owner";
 }
 
+function normalizeEmail(input) {
+  return String(input || "").trim().toLowerCase();
+}
+
 export default async function handler(req, res) {
   try {
     const session = await getServerSession(req, res, authOptions);
@@ -36,9 +40,26 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "PATCH") {
-      const { userId, action } = req.body || {};
+      const { userId, email, action } = req.body || {};
+      if (!action) return res.status(400).json({ message: "Invalid request" });
+
+      if (action === "promote_by_email") {
+        const normalizedEmail = normalizeEmail(email);
+        if (!normalizedEmail) return res.status(400).json({ message: "Email is required" });
+
+        const target = await users.findOne({ email: normalizedEmail });
+        if (!target) return res.status(404).json({ message: "User with this email was not found" });
+        if (target.role === "owner") return res.status(400).json({ message: "Owner account cannot be modified" });
+
+        await users.updateOne(
+          { _id: target._id },
+          { $set: { role: "admin", adminRequested: false, updatedAt: new Date() } }
+        );
+        return res.status(200).json({ message: "User promoted to admin" });
+      }
+
       const _id = toObjectId(userId);
-      if (!_id || !action) return res.status(400).json({ message: "Invalid request" });
+      if (!_id) return res.status(400).json({ message: "Invalid user id" });
 
       const target = await users.findOne({ _id });
       if (!target) return res.status(404).json({ message: "User not found" });
@@ -50,13 +71,27 @@ export default async function handler(req, res) {
       }
 
       if (action === "set_user") {
-        await users.updateOne({ _id }, { $set: { role: "user", adminRequested: false } });
+        await users.updateOne(
+          { _id },
+          { $set: { role: "user", adminRequested: false, updatedAt: new Date() } }
+        );
         return res.status(200).json({ message: "Role changed to user" });
       }
 
       if (action === "set_admin") {
-        await users.updateOne({ _id }, { $set: { role: "admin", adminRequested: false } });
+        await users.updateOne(
+          { _id },
+          { $set: { role: "admin", adminRequested: false, updatedAt: new Date() } }
+        );
         return res.status(200).json({ message: "Role changed to admin" });
+      }
+
+      if (action === "demote_admin") {
+        await users.updateOne(
+          { _id },
+          { $set: { role: "user", adminRequested: false, updatedAt: new Date() } }
+        );
+        return res.status(200).json({ message: "Admin demoted to user" });
       }
 
       if (action === "delete_user") {

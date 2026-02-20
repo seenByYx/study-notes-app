@@ -22,7 +22,7 @@ function toObjectId(id) {
 }
 
 function canManageNotes(session) {
-  return session?.user?.role === "admin";
+  return session?.user?.role === "admin" || session?.user?.role === "owner";
 }
 
 async function seedIfEmpty(collection) {
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
     if (req.method === "POST") {
       const session = await getServerSession(req, res, authOptions);
       if (!canManageNotes(session)) {
-        return res.status(403).json({ message: "Only admin can manage notes" });
+        return res.status(403).json({ message: "Only owner or admin can manage notes" });
       }
 
       const { title, url, type, scope, classKey, subjectKey, courseKey, semesterKey } = req.body || {};
@@ -106,7 +106,7 @@ export default async function handler(req, res) {
     if (req.method === "PUT") {
       const session = await getServerSession(req, res, authOptions);
       if (!canManageNotes(session)) {
-        return res.status(403).json({ message: "Only admin can manage notes" });
+        return res.status(403).json({ message: "Only owner or admin can manage notes" });
       }
 
       const { id, title, url, type } = req.body || {};
@@ -132,7 +132,7 @@ export default async function handler(req, res) {
     if (req.method === "DELETE") {
       const session = await getServerSession(req, res, authOptions);
       if (!canManageNotes(session)) {
-        return res.status(403).json({ message: "Only admin can manage notes" });
+        return res.status(403).json({ message: "Only owner or admin can manage notes" });
       }
 
       const { id } = req.body || {};

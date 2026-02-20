@@ -19,7 +19,8 @@ export const authOptions = {
       },
       async authorize(credentials) {
         const db = await connectToDB();
-        const user = await db.collection("users").findOne({ email: credentials.email });
+        const normalizedEmail = String(credentials.email || "").trim().toLowerCase();
+        const user = await db.collection("users").findOne({ email: normalizedEmail });
 
         if (!user) throw new Error("User not found");
 
@@ -45,13 +46,14 @@ export const authOptions = {
       if (account?.provider !== "google") return true;
       const db = await connectToDB();
       const users = db.collection("users");
-      const existing = await users.findOne({ email: user.email });
-      const ownerLogin = isOwnerEmail(user.email);
+      const normalizedEmail = String(user.email || "").trim().toLowerCase();
+      const existing = await users.findOne({ email: normalizedEmail });
+      const ownerLogin = isOwnerEmail(normalizedEmail);
 
       if (!existing) {
         const inserted = await users.insertOne({
           name: user.name || user.email?.split("@")[0] || "User",
-          email: user.email,
+          email: normalizedEmail,
           role: ownerLogin ? "owner" : "user",
           image: user.image || null,
           provider: "google",

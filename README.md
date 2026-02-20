@@ -33,7 +33,7 @@ npm run dev
 
 1. `owner`
 - Can promote/demote admins and manage users from owner console.
-- Cannot add or remove notes.
+- Can add, edit, and delete notes.
 
 2. `admin`
 - Can add, edit, and delete notes from subject pages.
@@ -47,3 +47,4 @@ npm run dev
 2. Confirm owner console appears on home page.
 3. Create/sign in with a second account, then promote it to `admin`.
 4. Sign in as admin and test add/edit/delete note (Google Drive link works).
+5. Sign in as owner and verify you can both manage admins and manage notes.

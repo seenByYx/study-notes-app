@@ -19,7 +19,7 @@ export default function NotesBoard({
 }) {
   const { data: session } = useSession();
   const role = session?.user?.role;
-  const canManage = role === "admin";
+  const canManage = role === "admin" || role === "owner";
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

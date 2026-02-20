@@ -1,8 +1,11 @@
 .panel {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--surface);
   padding: 20px;
+  box-shadow: var(--shadow-faint);
 }
 
 .header {
@@ -45,6 +48,13 @@
   background: var(--bg-soft);
   display: grid;
   gap: 6px;
+  transition: transform var(--ease-standard), border-color var(--ease-standard), box-shadow var(--ease-standard);
+}
+
+.item:hover {
+  transform: translateY(-2px);
+  border-color: #c6d2eb;
+  box-shadow: var(--shadow-faint);
 }
 
 .head {

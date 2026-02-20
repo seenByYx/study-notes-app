@@ -11,23 +11,24 @@ export default async function handler(req, res) {
 
   try {
     const { name, email, password, requestAdmin } = req.body || {};
-    if (!name || !email || !password) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!name || !normalizedEmail || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const db = await connectToDB();
     const usersCollection = db.collection("users");
-    const existingUser = await usersCollection.findOne({ email });
+    const existingUser = await usersCollection.findOne({ email: normalizedEmail });
 
     if (existingUser) {
       return res.status(409).json({ message: "User already exists. Please sign in." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const makeOwner = isOwnerEmail(email);
+    const makeOwner = isOwnerEmail(normalizedEmail);
     const newUser = {
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       role: makeOwner ? "owner" : "user",
       adminRequested: makeOwner ? false : Boolean(requestAdmin),
