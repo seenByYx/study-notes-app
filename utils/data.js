@@ -1,34 +1,23 @@
-export const courses = {
-  bscCs: {
-    name: "BSc Computer Science",
-    semesters: {
-      sem1: { name: "Semester 1", subjects: [{ name: "", pdfs: [] }] },
-      sem2: { name: "Semester 2", subjects: [{ name: "", pdfs: [] }] },
-      sem3: { name: "Semester 3", subjects: [{ name: "", pdfs: [] }] },
-      sem4: {
-        name: "Semester 4",
-        subjects: [
+import { catalog } from "./catalog";
+
+export const courses = Object.fromEntries(
+  Object.entries(catalog.courses).map(([courseKey, courseData]) => [
+    courseKey,
+    {
+      name: courseData.label,
+      semesters: Object.fromEntries(
+        Object.entries(courseData.semesters).map(([semesterKey, semesterData]) => [
+          semesterKey,
           {
-            name: "Mathematics",
-            pdfs: [
-              { name: "Amal Miss's", file: "Amal Miss.pdf", category: "Hand written" },
-              { name: "Infas Sir's", file: "Infas Sir.pdf", category: "Hand written" },
-              { name: "Sameeh’s 1", file: "Sameeh’s 1.pdf", category: "Hand written" },
-            ],
+            name: semesterData.label,
+            subjects: semesterData.subjects.map((subject) => ({
+              name: subject.label,
+              pdfs: [],
+            })),
           },
-          {
-            name: "Microprocessor",
-            pdfs: [
-              { name: "Microprocessor micro", file: "Microprocessor micro sem 3.pdf", category: "micro" },
-              { name: "Microprocessor 2021", file: "mp april 2021.pdf", category: "q-papers" },
-              { name: "Microprocessor 2022", file: "mP 2022.pdf", category: "q-papers" },
-              { name: "Microprocessor 2023", file: "mp23.pdf", category: "q-papers" },
-            ],
-          },
-        ],
-      },
-      sem5: { name: "Semester 5", subjects: [{ name: "", pdfs: [] }] },
-      sem6: { name: "Semester 6", subjects: [{ name: "", pdfs: [] }] },
+        ])
+      ),
+      subjects: [],
     },
-  },
-};
+  ])
+);

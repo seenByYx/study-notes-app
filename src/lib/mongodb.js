@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import bcrypt from "bcryptjs";
 
 const uri = process.env.MONGODB_URI;
 let client;
@@ -18,7 +19,7 @@ export async function connectToDB() {
   return client.db("study_notes");
 }
 
-export async function addUser(email, password, role = "student") {
+export async function addUser(email, password, role = "user") {
   const db = await connectToDB();
   const hashedPassword = await bcrypt.hash(password, 10);
   return await db.collection("users").insertOne({ email, password: hashedPassword, role });

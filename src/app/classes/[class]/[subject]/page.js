@@ -1,86 +1,43 @@
 "use client";
 
-import React from "react";
 import { useParams } from "next/navigation";
-import { classes } from "/utils/classesData";
+import NotesBoard from "../../../../components/NotesBoard";
+import CommentsBoard from "../../../../components/CommentsBoard";
+import { catalog } from "../../../../../utils/catalog";
 
-export default function SubjectPage() {
+export default function ClassSubjectPage() {
   const params = useParams();
-  const classKey = params.class?.toLowerCase();
-  const subjectKey = params.subject?.replace(/-/g, " ").toLowerCase();
+  const classKey = String(params.class || "");
+  const subjectKey = String(params.subject || "");
 
-  console.log("Class Param:", classKey);
-  console.log("Subject Param:", subjectKey);
+  const classData = catalog.classes[classKey];
+  const subjectData = classData?.subjects?.find((subject) => subject.key === subjectKey);
 
-  const classData = classes[classKey];
-
-  if (!classData) {
-    return <div>⚠️ Class not found!</div>;
-  }
-
-  const subjectData = classData.subjects.find(
-    (sub) => sub.name.toLowerCase() === subjectKey
-  );
-
-  if (!subjectData) {
-    return <div>⚠️ Subject not found!</div>;
+  if (!classData || !subjectData) {
+    return <p className="error-text">Subject not found.</p>;
   }
 
   return (
-    <div className="content4">
-      <h1>{subjectData.name} Notes</h1>
+    <div className="page-stack">
+      <section className="hero">
+        <h1>{subjectData.label}</h1>
+        <p>
+          {classData.label} notes. Click any note to open PDF/Drive file in a new tab.
+        </p>
+      </section>
 
-      {/* Notes Section */}
-      {(subjectData.notes?.pdfs?.length > 0 || subjectData.notes?.images?.length > 0) && (
-        <div>
-          <h2>📚 Notes:</h2>
-          <ul>
-            {subjectData.notes?.pdfs?.map((pdf, index) => (
-              <li key={index}>
-                <a href={`/pdfs/${pdf.file}`} target="_blank" rel="noopener noreferrer">
-                  {pdf.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-          {subjectData.notes?.images?.map((img, index) => (
-            <div key={index} style={{ marginBottom: "15px" }}>
-              <p>{img.name}</p>
-              <img
-                src={`/images/${img.file}`}
-                alt={img.name}
-                style={{ maxWidth: "100%", height: "auto", border: "1px solid #ddd", padding: "5px" }}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      <NotesBoard
+        title={`${classData.label} / ${subjectData.label}`}
+        scope="class"
+        classKey={classKey}
+        subjectKey={subjectKey}
+      />
 
-      {/* Question Papers Section */}
-      {(subjectData.qPapers?.pdfs?.length > 0 || subjectData.qPapers?.images?.length > 0) && (
-        <div>
-          <h2>📄 Question Papers:</h2>
-          <ul>
-            {subjectData.qPapers?.pdfs?.map((pdf, index) => (
-              <li key={index}>
-                <a href={`/pdfs/${pdf.file}`} target="_blank" rel="noopener noreferrer">
-                  {pdf.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-          {subjectData.qPapers?.images?.map((img, index) => (
-            <div key={index} style={{ marginBottom: "15px" }}>
-              <p>{img.name}</p>
-              <img
-                src={`/images/${img.file}`}
-                alt={img.name}
-                style={{ maxWidth: "100%", height: "auto", border: "1px solid #ddd", padding: "5px" }}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      <CommentsBoard
+        scope="class"
+        classKey={classKey}
+        subjectKey={subjectKey}
+      />
     </div>
   );
 }

@@ -1,48 +1,47 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { courses } from "/utils/data";
+import NotesBoard from "../../../../../components/NotesBoard";
+import CommentsBoard from "../../../../../components/CommentsBoard";
+import { catalog } from "../../../../../../utils/catalog";
 
-export default function SubjectPage() {
-  const { course: courseName, semester, subject: subjectName } = useParams();
-  
-  const courseData = courses[courseName];
-  const semesterData = courseData?.semesters[semester];
-  const subjectData = semesterData?.subjects.find(
-    (sub) => sub.name.toLowerCase().replace(/ /g, "-") === subjectName
-  );
+export default function CourseSubjectPage() {
+  const params = useParams();
+  const courseKey = String(params.course || "");
+  const semesterKey = String(params.semester || "");
+  const subjectKey = String(params.subject || "");
 
-  const [pdfs, setPdfs] = useState(subjectData?.pdfs || []);
+  const courseData = catalog.courses[courseKey];
+  const semesterData = courseData?.semesters?.[semesterKey];
+  const subjectData = semesterData?.subjects?.find((subject) => subject.key === subjectKey);
 
-  useEffect(() => {
-    setPdfs(subjectData?.pdfs || []);
-  }, [subjectData?.pdfs]);
-
-  // Group PDFs by category
-  const categorizedPdfs = pdfs.reduce((acc, pdf) => {
-    if (!acc[pdf.category]) acc[pdf.category] = [];
-    acc[pdf.category].push(pdf);
-    return acc;
-  }, {});
+  if (!courseData || !semesterData || !subjectData) {
+    return <p className="error-text">Subject not found.</p>;
+  }
 
   return (
-    <div className="content4">
-      <h1>{subjectData?.name} Notes</h1>
-      {Object.entries(categorizedPdfs).map(([category, pdfList]) => (
-        <div key={category}>
-          <h2>{category}</h2>
-          <ul>
-            {pdfList.map((pdf, index) => (
-              <li key={index}>
-                <a href={`/pdfs/${pdf.file}`} target="_blank" rel="noopener noreferrer">
-                  {pdf.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+    <div className="page-stack">
+      <section className="hero">
+        <h1>{subjectData.label}</h1>
+        <p>
+          {courseData.label} / {semesterData.label}. Open a note to view the attached file.
+        </p>
+      </section>
+
+      <NotesBoard
+        title={`${courseData.label} / ${semesterData.label} / ${subjectData.label}`}
+        scope="course"
+        courseKey={courseKey}
+        semesterKey={semesterKey}
+        subjectKey={subjectKey}
+      />
+
+      <CommentsBoard
+        scope="course"
+        courseKey={courseKey}
+        semesterKey={semesterKey}
+        subjectKey={subjectKey}
+      />
     </div>
   );
 }

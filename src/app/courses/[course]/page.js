@@ -1,67 +1,34 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { courses } from "/utils/data";  
+import { useParams } from "next/navigation";
+import { catalog } from "../../../../utils/catalog";
 
-export default function CoursePage({ params }) {
-  const [courseName, setCourseName] = useState("");       
-  const [courseData, setCourseData] = useState(null);     
-  const [expandedSem, setExpandedSem] = useState(null);    
-
-  useEffect(() => {
-    const unwrapParams = async () => {
-      const resolvedParams = await params;
-      setCourseName(resolvedParams.course);
-      setCourseData(courses[resolvedParams.course]);
-    };
-    unwrapParams();
-  }, [params]);
-
-  // Function to toggle semester
-  const toggleSemester = (sem) => {
-    setExpandedSem(expandedSem === sem ? null : sem);
-  };
+export default function CoursePage() {
+  const params = useParams();
+  const courseKey = String(params.course || "");
+  const courseData = catalog.courses[courseKey];
 
   if (!courseData) {
-    return <div>Course not found!</div>;
+    return <p className="error-text">Course not found.</p>;
   }
 
   return (
-    <div className="content2">
-      <h1>{courseData.name} Study Notes</h1>
-      <p>Select a semester to view subjects:</p>
+    <div className="page-stack">
+      <section className="hero">
+        <h1>{courseData.label}</h1>
+        <p>Select a semester.</p>
+      </section>
 
-      {Object.entries(courseData.semesters).map(([semKey, semData]) => (
-        <div key={semKey} className="semester-container">
-          <div
-            className="semester-header"
-            onClick={() => toggleSemester(semKey)}
-          >
-            <span>{semData.name}</span>
-            <span className="arrow">{expandedSem === semKey ? "▲" : "▼"}</span>
-          </div>
-
-          {/* Render subjects if this semester is expanded */}
-          {expandedSem === semKey && (
-            <div className="subjects-list">
-              <ul>
-                {semData.subjects.map((subject, index) => (
-                  <li key={index}>
-                    <Link
-                      href={`/courses/${courseName}/${semKey}/${subject.name
-                        .toLowerCase()
-                        .replace(/ /g, "-")}`}
-                    >
-                      {subject.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      ))}
+      <section className="card">
+        <ul className="sub-list">
+          {Object.entries(courseData.semesters).map(([semesterKey, semesterData]) => (
+            <li key={semesterKey}>
+              <Link href={`/courses/${courseKey}/${semesterKey}`}>{semesterData.label}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Study Notes App
 
-## Getting Started
+## Local Setup (MongoDB + Auth)
 
-First, run the development server:
-
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create `study-notes-app/.env.local`:
+```env
+MONGODB_URI=mongodb+srv://<user>:<password>@microcluster.w0f9z50.mongodb.net/study_notes?retryWrites=true&w=majority&appName=microcluster
+NEXTAUTH_SECRET=<random-64-char-secret>
+NEXTAUTH_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=<google-client-id>
+GOOGLE_CLIENT_SECRET=<google-client-secret>
+OWNER_EMAIL=<your-email-used-for-first-owner-login>
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. In Google Cloud OAuth client, add redirect URI:
+```text
+http://localhost:3000/api/auth/callback/google
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Start the app:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open `http://localhost:3000`.
 
-To learn more about Next.js, take a look at the following resources:
+## Role Behavior
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. `owner`
+- Can promote/demote admins and manage users from owner console.
+- Cannot add or remove notes.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. `admin`
+- Can add, edit, and delete notes from subject pages.
 
-## Deploy on Vercel
+3. `user`
+- Can view notes and comment (if signed in).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## First Local Test Flow
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Sign up or Google sign-in with the same email as `OWNER_EMAIL`.
+2. Confirm owner console appears on home page.
+3. Create/sign in with a second account, then promote it to `admin`.
+4. Sign in as admin and test add/edit/delete note (Google Drive link works).

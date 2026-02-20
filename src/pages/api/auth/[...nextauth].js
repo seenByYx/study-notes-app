@@ -1,8 +1,13 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { connectToDB } from "../../../lib/mongodb";
 import bcrypt from "bcryptjs";
-import { ObjectId } from "mongodb";
+
+function isOwnerEmail(email) {
+  const ownerEmail = String(process.env.OWNER_EMAIL || "").trim().toLowerCase();
+  return Boolean(ownerEmail) && String(email || "").trim().toLowerCase() === ownerEmail;
+}
 
 export const authOptions = {
   providers: [
@@ -24,8 +29,42 @@ export const authOptions = {
         return { id: user._id.toString(), email: user.email, role: user.role };
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider !== "google") return true;
+      const db = await connectToDB();
+      const users = db.collection("users");
+      const existing = await users.findOne({ email: user.email });
+      const ownerLogin = isOwnerEmail(user.email);
+
+      if (!existing) {
+        const inserted = await users.insertOne({
+          email: user.email,
+          role: ownerLogin ? "owner" : "user",
+          provider: "google",
+          createdAt: new Date(),
+        });
+        user.id = inserted.insertedId.toString();
+        user.role = ownerLogin ? "owner" : "user";
+        return true;
+      }
+
+      if (ownerLogin && existing.role !== "owner") {
+        await users.updateOne({ _id: existing._id }, { $set: { role: "owner" } });
+        user.id = existing._id.toString();
+        user.role = "owner";
+        return true;
+      }
+
+      user.id = existing._id.toString();
+      user.role = existing.role || "user";
+      return true;
+    },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
@@ -36,8 +75,9 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role || token.role || "user";
       }
+      if (!token.role) token.role = "user";
       return token;
     },
   },
