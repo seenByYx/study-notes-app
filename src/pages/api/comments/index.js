@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { ObjectId } from "mongodb";
 import { authOptions } from "../auth/[...nextauth]";
 import { connectToDB } from "../../../lib/mongodb";
 
@@ -16,6 +17,18 @@ function validateScope({ scope, classKey, courseKey, semesterKey, subjectKey }) 
     return "courseKey and semesterKey are required for course comments.";
   }
   return "";
+}
+
+function toObjectId(id) {
+  try {
+    return new ObjectId(id);
+  } catch {
+    return null;
+  }
+}
+
+function canModerateComments(session) {
+  return session?.user?.role === "owner" || session?.user?.role === "admin";
 }
 
 export default async function handler(req, res) {
@@ -70,12 +83,27 @@ export default async function handler(req, res) {
         courseKey: courseKey || null,
         semesterKey: semesterKey || null,
         createdAt: new Date(),
-        createdBy: session.user.email,
+        createdBy: session.user.name || session.user.email?.split("@")[0] || "User",
+        createdByImage: session.user.image || null,
         createdById: session.user.id,
       };
 
       const inserted = await comments.insertOne(doc);
       return res.status(201).json({ comment: { ...doc, _id: inserted.insertedId } });
+    }
+
+    if (req.method === "DELETE") {
+      const session = await getServerSession(req, res, authOptions);
+      if (!canModerateComments(session)) {
+        return res.status(403).json({ message: "Only owner or admin can delete comments." });
+      }
+
+      const { id } = req.body || {};
+      const _id = toObjectId(id);
+      if (!_id) return res.status(400).json({ message: "Invalid comment id." });
+
+      await comments.deleteOne({ _id });
+      return res.status(200).json({ message: "Comment deleted." });
     }
 
     return res.status(405).json({ message: "Method not allowed" });

@@ -10,6 +10,17 @@ function formatDate(value) {
   return new Date(value).toLocaleString();
 }
 
+function getInitial(name) {
+  const safe = String(name || "User").trim();
+  return safe.charAt(0).toUpperCase() || "U";
+}
+
+function formatDisplayName(name) {
+  const safe = String(name || "User").trim();
+  if (safe.includes("@")) return safe.split("@")[0];
+  return safe;
+}
+
 export default function CommentsBoard({
   title = "Comments",
   scope,
@@ -19,6 +30,7 @@ export default function CommentsBoard({
   subjectKey,
 }) {
   const { data: session } = useSession();
+  const canModerate = session?.user?.role === "owner" || session?.user?.role === "admin";
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -85,6 +97,24 @@ export default function CommentsBoard({
     }
   };
 
+  const handleDelete = async (id) => {
+    setError("");
+    setMessage("");
+    try {
+      const res = await fetch("/api/comments", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to delete comment");
+      setMessage("Comment deleted.");
+      await loadComments();
+    } catch (deleteError) {
+      setError(deleteError.message);
+    }
+  };
+
   return (
     <section className={styles.panel}>
       <div className={styles.header}>
@@ -99,11 +129,25 @@ export default function CommentsBoard({
       {!loading && comments.length > 0 && (
         <ul className={styles.list}>
           {comments.map((comment) => (
-            <li key={comment._id || `${comment.createdAt}-${comment.createdBy}`} className={styles.item}>
-              <div className={styles.body}>{comment.text}</div>
-              <div className={styles.meta}>
-                {comment.createdBy || "Anonymous"} • {formatDate(comment.createdAt)}
+            <li key={comment._id || `${comment.createdAt}-${comment.createdById}`} className={styles.item}>
+              <div className={styles.head}>
+                {comment.createdByImage ? (
+                  <img className={styles.avatarImage} src={comment.createdByImage} alt={comment.createdBy || "User"} />
+                ) : (
+                  <div className={styles.avatarFallback}>{getInitial(comment.createdBy)}</div>
+                )}
+                <div className={styles.meta}>
+                  {formatDisplayName(comment.createdBy)} | {formatDate(comment.createdAt)}
+                </div>
               </div>
+              <div className={styles.body}>{comment.text}</div>
+              {canModerate && (
+                <div className={styles.rowEnd}>
+                  <button type="button" className={styles.deleteButton} onClick={() => handleDelete(comment._id)}>
+                    Delete
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>

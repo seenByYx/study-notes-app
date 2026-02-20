@@ -13,7 +13,9 @@ export default function ContactPage() {
         </article>
         <article className="card">
           <h3>Telegram</h3>
-          <p className="muted">Telegram user ID: 1971125096</p>
+          <p className="muted">
+            <a href="tg://openmessage?user_id=1971125096">Telegram</a>
+          </p>
         </article>
         <article className="card">
           <h3>Response Time</h3>

@@ -47,6 +47,33 @@
   gap: 6px;
 }
 
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatarImage {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.avatarFallback {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--brand);
+}
+
 .body {
   font-size: 0.95rem;
   line-height: 1.4;
@@ -84,6 +111,19 @@
 .actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.rowEnd {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.deleteButton {
+  background: #b42318;
+}
+
+.deleteButton:hover {
+  background: #912018;
 }
 
 .error {
