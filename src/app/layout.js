@@ -21,6 +21,9 @@ function AppShell({ children }) {
 
             <nav className="site-nav">
               <Link href="/">Home</Link>
+              {(session?.user?.role === "admin" || session?.user?.role === "owner") && (
+                <Link href="/upload">Upload</Link>
+              )}
               <Link href="/contact">Contact</Link>
             </nav>
 

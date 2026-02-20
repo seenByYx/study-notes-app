@@ -16,10 +16,11 @@ export default function NotesBoard({
   courseKey,
   semesterKey,
   subjectKey,
+  allowManage = false,
 }) {
   const { data: session } = useSession();
   const role = session?.user?.role;
-  const canManage = role === "admin" || role === "owner";
+  const canManage = allowManage && (role === "admin" || role === "owner");
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

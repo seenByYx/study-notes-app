@@ -259,6 +259,11 @@ button:hover {
   gap: 12px;
 }
 
+.upload-grid {
+  display: grid;
+  gap: 10px;
+}
+
 .auth-wrap {
   width: min(460px, 94vw);
   margin: 40px auto;
