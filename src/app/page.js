@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { catalog } from "../../utils/catalog";
@@ -36,12 +36,32 @@ export default function HomePage() {
   const { data: session } = useSession();
   const isOwner = session?.user?.role === "owner";
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("recent");
+  const [results, setResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const allItems = useMemo(() => getSearchItems(), []);
-  const results = useMemo(() => {
-    if (!query.trim()) return [];
-    const q = query.toLowerCase().trim();
-    return allItems.filter((item) => item.label.toLowerCase().includes(q));
-  }, [query, allItems]);
+
+  useEffect(() => {
+    const run = async () => {
+      if (!query.trim()) {
+        setResults([]);
+        return;
+      }
+      setSearchLoading(true);
+      try {
+        const params = new URLSearchParams({ q: query.trim(), filter, limit: "15" });
+        const res = await fetch(`/api/search?${params.toString()}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed search");
+        setResults(data.results || []);
+      } catch {
+        setResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    };
+    run();
+  }, [query, filter]);
 
   return (
     <div className="page-stack">
@@ -52,16 +72,34 @@ export default function HomePage() {
 
       <section className="card">
         <h3>Quick Search</h3>
+        <div className="upload-grid">
         <input
           type="text"
-          placeholder="Search subjects..."
+          placeholder="Search notes/comments..."
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+          <select value={filter} onChange={(event) => setFilter(event.target.value)}>
+            <option value="recent">Recent</option>
+            <option value="most_opened">Most opened</option>
+            <option value="top_rated">Top rated</option>
+          </select>
+        </div>
         {query && (
           <ul className="sub-list" style={{ marginTop: 12 }}>
+            {searchLoading && <li className="muted">Searching...</li>}
             {results.length === 0 && <li className="muted">No matches found.</li>}
             {results.map((item) => (
+              <li key={`${item.href}-${item.title}`}>
+                <Link href={item.href}>{item.title || item.label}</Link>
+                {item.subtitle && <div className="muted" style={{ fontSize: "0.82rem" }}>{item.subtitle}</div>}
+              </li>
+            ))}
+          </ul>
+        )}
+        {!query && (
+          <ul className="sub-list" style={{ marginTop: 12 }}>
+            {allItems.slice(0, 8).map((item) => (
               <li key={item.href}>
                 <Link href={item.href}>{item.label}</Link>
               </li>
