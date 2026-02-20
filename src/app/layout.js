@@ -48,7 +48,9 @@ function AppShell({ children }) {
         <footer className="site-footer">
           <div className="container footer-row">
             <p>Simple notes sharing for students.</p>
-            <p>Browse class and course notes in one place.</p>
+            <p>
+              <Link href="/privacy">Privacy Policy</Link> | <Link href="/terms">Terms of Use</Link>
+            </p>
           </div>
         </footer>
       )}
