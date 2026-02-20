@@ -1,0 +1,56 @@
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 20px;
+}
+
+.hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-soft);
+  padding: 10px 12px;
+}
+
+.body {
+  font-size: 0.94rem;
+}
+
+.meta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.form {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.error {
+  color: #b03a2e;
+}
+
+.success {
+  color: #117a65;
+  margin: 0;
+}

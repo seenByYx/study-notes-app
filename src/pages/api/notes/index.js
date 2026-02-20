@@ -5,6 +5,7 @@ import { connectToDB } from "../../../lib/mongodb";
 import { defaultSeedNotes } from "../../../../utils/catalog";
 
 const validTypes = new Set(["pdf", "drive", "link"]);
+const validNoteKinds = new Set(["notes", "question-paper", "assignment", "reference"]);
 
 function normalizeUrl(input) {
   if (!input) return "";
@@ -25,12 +26,38 @@ function canManageNotes(session) {
   return session?.user?.role === "admin" || session?.user?.role === "owner";
 }
 
+function parseTags(input) {
+  if (!input) return [];
+  if (Array.isArray(input)) return input.map((item) => String(item).trim()).filter(Boolean).slice(0, 8);
+  return String(input)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+}
+
+function validateUploadTemplate({ title, chapter, noteKind }) {
+  if (!chapter) return "Chapter/Unit is required";
+  if (!noteKind || !validNoteKinds.has(noteKind)) return "Invalid note type";
+  const normalizedTitle = String(title || "").trim();
+  if (!normalizedTitle.includes(" - ")) {
+    return "Title must follow template: Chapter - Topic";
+  }
+  return "";
+}
+
 async function seedIfEmpty(collection) {
   const existing = await collection.countDocuments({});
   if (existing > 0) return;
   await collection.insertMany(
     defaultSeedNotes.map((note) => ({
       ...note,
+      chapter: note.chapter || "General",
+      noteKind: note.noteKind || "notes",
+      tags: note.tags || [],
+      openCount: 0,
+      ratingScore: 0,
+      ratingCount: 0,
       createdAt: new Date(),
       createdBy: "seed",
     }))
@@ -44,7 +71,7 @@ export default async function handler(req, res) {
     await seedIfEmpty(notes);
 
     if (req.method === "GET") {
-      const { scope, classKey, subjectKey, courseKey, semesterKey, limit } = req.query;
+      const { scope, classKey, subjectKey, courseKey, semesterKey, limit, page, q, sort } = req.query;
       const query = {};
 
       const addEqFilter = (key, value) => {
@@ -68,14 +95,29 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: e.message });
       }
 
-      const parsedLimit = Number(limit) || 100;
-      const items = await notes
-        .find(query)
-        .sort({ createdAt: -1 })
-        .limit(Math.min(parsedLimit, 200))
-        .toArray();
+      if (q) query.title = { $regex: String(q).trim(), $options: "i" };
 
-      return res.status(200).json({ notes: items });
+      const parsedLimit = Math.min(Number(limit) || 20, 50);
+      const parsedPage = Math.max(Number(page) || 1, 1);
+      const skip = (parsedPage - 1) * parsedLimit;
+      const sortMap = {
+        recent: { createdAt: -1 },
+        most_opened: { openCount: -1, createdAt: -1 },
+        top_rated: { ratingScore: -1, ratingCount: -1, createdAt: -1 },
+      };
+      const selectedSort = sortMap[String(sort || "recent")] || sortMap.recent;
+
+      const [items, total] = await Promise.all([
+        notes.find(query).sort(selectedSort).skip(skip).limit(parsedLimit).toArray(),
+        notes.countDocuments(query),
+      ]);
+
+      return res.status(200).json({
+        notes: items,
+        total,
+        page: parsedPage,
+        hasMore: skip + items.length < total,
+      });
     }
 
     if (req.method === "POST") {
@@ -84,10 +126,13 @@ export default async function handler(req, res) {
         return res.status(403).json({ message: "Only owner or admin can manage notes" });
       }
 
-      const { title, url, type, scope, classKey, subjectKey, courseKey, semesterKey } = req.body || {};
+      const { title, url, type, scope, classKey, subjectKey, courseKey, semesterKey, chapter, noteKind, tags } =
+        req.body || {};
       if (!title || !url || !scope || !subjectKey) {
         return res.status(400).json({ message: "Missing required fields" });
       }
+      const templateError = validateUploadTemplate({ title, chapter, noteKind });
+      if (templateError) return res.status(400).json({ message: templateError });
 
       if (scope !== "class" && scope !== "course") {
         return res.status(400).json({ message: "Invalid scope" });
@@ -110,6 +155,12 @@ export default async function handler(req, res) {
         classKey: classKey || null,
         courseKey: courseKey || null,
         semesterKey: semesterKey || null,
+        chapter: String(chapter).trim(),
+        noteKind,
+        tags: parseTags(tags),
+        openCount: 0,
+        ratingScore: 0,
+        ratingCount: 0,
         createdAt: new Date(),
         createdBy: session.user.email,
       };
@@ -124,9 +175,11 @@ export default async function handler(req, res) {
         return res.status(403).json({ message: "Only owner or admin can manage notes" });
       }
 
-      const { id, title, url, type } = req.body || {};
+      const { id, title, url, type, chapter, noteKind, tags } = req.body || {};
       const _id = toObjectId(id);
       if (!_id || !title || !url) return res.status(400).json({ message: "Invalid request" });
+      const templateError = validateUploadTemplate({ title, chapter, noteKind });
+      if (templateError) return res.status(400).json({ message: templateError });
 
       await notes.updateOne(
         { _id },
@@ -135,6 +188,9 @@ export default async function handler(req, res) {
             title: String(title).trim(),
             url: normalizeUrl(String(url).trim()),
             type: validTypes.has(type) ? type : "link",
+            chapter: String(chapter).trim(),
+            noteKind,
+            tags: parseTags(tags),
             updatedAt: new Date(),
             updatedBy: session.user.email,
           },

@@ -9,6 +9,13 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString();
 }
 
+const NOTE_KIND_OPTIONS = [
+  { value: "notes", label: "Notes" },
+  { value: "question-paper", label: "Question Paper" },
+  { value: "assignment", label: "Assignment" },
+  { value: "reference", label: "Reference" },
+];
+
 export default function NotesBoard({
   title,
   scope,
@@ -21,52 +28,71 @@ export default function NotesBoard({
   const { data: session } = useSession();
   const role = session?.user?.role;
   const canManage = allowManage && (role === "admin" || role === "owner");
+  const canRate = Boolean(session?.user);
+
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(1);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState("");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("recent");
   const [form, setForm] = useState({
     title: "",
+    chapter: "",
+    noteKind: "notes",
+    tags: "",
     url: "",
-    type: "link",
+    type: "drive",
   });
 
-  const query = useMemo(() => {
+  const queryBase = useMemo(() => {
     const params = new URLSearchParams({
       scope,
       subjectKey,
+      limit: "12",
+      sort,
     });
     if (classKey) params.set("classKey", classKey);
     if (courseKey) params.set("courseKey", courseKey);
     if (semesterKey) params.set("semesterKey", semesterKey);
-    return params.toString();
-  }, [scope, subjectKey, classKey, courseKey, semesterKey]);
+    if (search.trim()) params.set("q", search.trim());
+    return params;
+  }, [scope, subjectKey, classKey, courseKey, semesterKey, search, sort]);
 
   const clearForm = () => {
-    setForm({ title: "", url: "", type: "link" });
+    setForm({ title: "", chapter: "", noteKind: "notes", tags: "", url: "", type: "drive" });
     setEditingId("");
   };
 
-  const loadNotes = async () => {
-    setLoading(true);
+  const fetchPage = async ({ nextPage = 1, append = false }) => {
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     setError("");
 
     try {
-      const res = await fetch(`/api/notes?${query}`);
+      const params = new URLSearchParams(queryBase);
+      params.set("page", String(nextPage));
+      const res = await fetch(`/api/notes?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to load notes");
-      setNotes(data.notes || []);
+      setNotes((prev) => (append ? [...prev, ...(data.notes || [])] : data.notes || []));
+      setHasMore(Boolean(data.hasMore));
+      setPage(nextPage);
     } catch (fetchError) {
       setError(fetchError.message);
     } finally {
-      setLoading(false);
+      if (append) setLoadingMore(false);
+      else setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadNotes();
-  }, [query]);
+    fetchPage({ nextPage: 1, append: false });
+  }, [queryBase.toString()]);
 
   const handleChange = (event) => {
     setForm((prev) => ({
@@ -102,7 +128,7 @@ export default function NotesBoard({
 
       clearForm();
       setMessage(isEdit ? "Note updated" : "Note added");
-      await loadNotes();
+      await fetchPage({ nextPage: 1, append: false });
     } catch (submitError) {
       setError(submitError.message);
     }
@@ -114,14 +140,19 @@ export default function NotesBoard({
     setEditingId(note._id);
     setForm({
       title: note.title || "",
+      chapter: note.chapter || "",
+      noteKind: note.noteKind || "notes",
+      tags: Array.isArray(note.tags) ? note.tags.join(", ") : "",
       url: note.url || "",
-      type: note.type || "link",
+      type: note.type || "drive",
     });
   };
 
   const deleteNote = async (id) => {
     setError("");
     setMessage("");
+    const previous = notes;
+    setNotes((current) => current.filter((item) => item._id !== id));
     try {
       const res = await fetch("/api/notes", {
         method: "DELETE",
@@ -132,18 +163,69 @@ export default function NotesBoard({
       if (!res.ok) throw new Error(data.message || "Failed to delete note");
       if (editingId === id) clearForm();
       setMessage("Note deleted");
-      await loadNotes();
     } catch (deleteError) {
+      setNotes(previous);
       setError(deleteError.message);
+    }
+  };
+
+  const trackOpen = async (id) => {
+    fetch("/api/notes/open", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    }).catch(() => {});
+    setNotes((prev) =>
+      prev.map((note) => (note._id === id ? { ...note, openCount: Number(note.openCount || 0) + 1 } : note))
+    );
+  };
+
+  const rateNote = async (id, value) => {
+    if (!canRate) {
+      setError("Sign in to rate notes");
+      return;
+    }
+    setError("");
+    try {
+      const res = await fetch("/api/notes/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, value }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to rate");
+      await fetchPage({ nextPage: 1, append: false });
+    } catch (rateError) {
+      setError(rateError.message);
     }
   };
 
   return (
     <section className={styles.panel}>
-      <h2>{title}</h2>
+      <div className={styles.headerRow}>
+        <h2>{title}</h2>
+        <div className={styles.filters}>
+          <input
+            placeholder="Search titles..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <select value={sort} onChange={(event) => setSort(event.target.value)}>
+            <option value="recent">Recent</option>
+            <option value="most_opened">Most opened</option>
+            <option value="top_rated">Top rated</option>
+          </select>
+        </div>
+      </div>
       <p className={styles.hint}>Open any item to view its PDF, Drive file, or external resource.</p>
 
-      {loading && <p className={styles.hint}>Loading notes...</p>}
+      {loading && (
+        <div className={styles.skeletonWrap}>
+          <div className={styles.skeleton} />
+          <div className={styles.skeleton} />
+          <div className={styles.skeleton} />
+        </div>
+      )}
       {!loading && notes.length === 0 && <div className={styles.empty}>No notes uploaded yet.</div>}
 
       {!loading && notes.length > 0 && (
@@ -151,15 +233,22 @@ export default function NotesBoard({
           {notes.map((note) => (
             <li key={note._id || `${note.title}-${note.url}`} className={styles.item}>
               <div>
-                <a href={note.url} target="_blank" rel="noopener noreferrer">
+                <a href={note.url} target="_blank" rel="noopener noreferrer" onClick={() => trackOpen(note._id)}>
                   {note.title}
                 </a>
+                <div className={styles.meta}>
+                  {note.chapter ? `${note.chapter} | ` : ""}
+                  {note.noteKind || "notes"} | opens: {note.openCount || 0} | score: {note.ratingScore || 0}
+                </div>
                 <div className={styles.meta}>
                   Added {formatDate(note.createdAt)} {note.createdBy ? `by ${note.createdBy}` : ""}
                 </div>
               </div>
               <div className={styles.actions}>
                 <span className={styles.tag}>{note.type || "link"}</span>
+                <button type="button" className={styles.secondary} onClick={() => rateNote(note._id, 5)}>
+                  Rate 5
+                </button>
                 {canManage && (
                   <>
                     <button type="button" className={styles.secondary} onClick={() => startEdit(note)}>
@@ -176,16 +265,47 @@ export default function NotesBoard({
         </ul>
       )}
 
+      {!loading && hasMore && (
+        <div className={styles.actions}>
+          <button type="button" className={styles.secondary} disabled={loadingMore} onClick={() => fetchPage({ nextPage: page + 1, append: true })}>
+            {loadingMore ? "Loading..." : "Load More"}
+          </button>
+        </div>
+      )}
+
       {canManage && (
         <div className={styles.admin}>
           <h3>{editingId ? "Edit Note" : "Add Note"}</h3>
+          <p className={styles.hint}>Template: `Chapter - Topic`</p>
           <form onSubmit={handleSubmit} className={styles.form}>
             <input
               name="title"
-              placeholder="Note title"
+              placeholder="Example: Unit 2 - Boolean Algebra"
               value={form.title}
               onChange={handleChange}
               required
+            />
+            <div className={styles.inline}>
+              <input
+                name="chapter"
+                placeholder="Chapter / Unit"
+                value={form.chapter}
+                onChange={handleChange}
+                required
+              />
+              <select name="noteKind" value={form.noteKind} onChange={handleChange}>
+                {NOTE_KIND_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <input
+              name="tags"
+              placeholder="Tags (comma separated)"
+              value={form.tags}
+              onChange={handleChange}
             />
             <div className={styles.inline}>
               <input
@@ -196,9 +316,9 @@ export default function NotesBoard({
                 required
               />
               <select name="type" value={form.type} onChange={handleChange}>
-                <option value="link">Link</option>
                 <option value="drive">Drive</option>
                 <option value="pdf">PDF</option>
+                <option value="link">Link</option>
               </select>
             </div>
             {error && <div className={styles.error}>{error}</div>}
