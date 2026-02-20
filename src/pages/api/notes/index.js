@@ -47,11 +47,26 @@ export default async function handler(req, res) {
       const { scope, classKey, subjectKey, courseKey, semesterKey, limit } = req.query;
       const query = {};
 
-      if (scope) query.scope = scope;
-      if (classKey) query.classKey = classKey;
-      if (subjectKey) query.subjectKey = subjectKey;
-      if (courseKey) query.courseKey = courseKey;
-      if (semesterKey) query.semesterKey = semesterKey;
+      const addEqFilter = (key, value) => {
+        if (typeof value === "undefined" || value === null || value === "") {
+          return;
+        }
+        // Ensure value is a simple string to avoid NoSQL operator injection
+        if (Array.isArray(value) || typeof value !== "string") {
+          throw new Error(`Invalid query parameter: ${key}`);
+        }
+        query[key] = { $eq: value };
+      };
+
+      try {
+        addEqFilter("scope", scope);
+        addEqFilter("classKey", classKey);
+        addEqFilter("subjectKey", subjectKey);
+        addEqFilter("courseKey", courseKey);
+        addEqFilter("semesterKey", semesterKey);
+      } catch (e) {
+        return res.status(400).json({ message: e.message });
+      }
 
       const parsedLimit = Number(limit) || 100;
       const items = await notes
