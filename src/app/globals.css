@@ -155,6 +155,24 @@ button:hover {
   padding: 28px 0 36px;
 }
 
+.back-nav {
+  margin: 0 0 14px;
+}
+
+.back-button {
+  background: #ffffff;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+}
+
+.back-button:hover {
+  background: var(--bg-soft);
+  border-color: #bfcce8;
+}
+
 .site-footer {
   border-top: 1px solid var(--border);
   margin-top: 30px;

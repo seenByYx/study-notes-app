@@ -1,14 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { SessionProvider, signOut, useSession } from "next-auth/react";
 import "./globals.css";
 
 function AppShell({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const isAuthPage = pathname.startsWith("/auth/");
+  const showBackButton = !isAuthPage && pathname !== "/";
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push("/");
+  };
 
   return (
     <>
@@ -42,7 +52,16 @@ function AppShell({ children }) {
         </header>
       )}
 
-      <main className="container main-content">{children}</main>
+      <main className="container main-content">
+        {showBackButton && (
+          <div className="back-nav">
+            <button type="button" className="back-button" onClick={handleBack}>
+              {"< Back"}
+            </button>
+          </div>
+        )}
+        {children}
+      </main>
 
       {!isAuthPage && (
         <footer className="site-footer">
