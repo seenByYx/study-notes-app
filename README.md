@@ -29,6 +29,46 @@ npm run dev
 
 5. Open `http://localhost:3000`.
 
+## Telegram Mini App Setup
+
+Add these variables to `.env.local` (and Vercel project env for production):
+```env
+TELEGRAM_BOT_TOKEN=<from-botfather>
+TELEGRAM_BOT_USERNAME=<your-bot-username-without-@>
+TELEGRAM_WEB_APP_URL=https://study-notes-rho.vercel.app/telegram
+TELEGRAM_WEBHOOK_SECRET=<long-random-secret>
+```
+
+Webhook endpoint used by this project:
+```text
+POST /api/telegram/webhook
+```
+
+After deployment, set webhook (PowerShell):
+```powershell
+$token = "<bot-token>"
+$secret = "<webhook-secret>"
+$webhookUrl = "https://study-notes-rho.vercel.app/api/telegram/webhook"
+Invoke-RestMethod -Method POST -Uri "https://api.telegram.org/bot$token/setWebhook" -Body @{
+  url = $webhookUrl
+  secret_token = $secret
+}
+```
+
+Set bot menu button so users can launch your mini app from the bot:
+```powershell
+$token = "<bot-token>"
+$menu = '{"type":"web_app","text":"Open Study Notes","web_app":{"url":"https://study-notes-rho.vercel.app/telegram"}}'
+Invoke-RestMethod -Method POST -Uri "https://api.telegram.org/bot$token/setChatMenuButton" -Body @{
+  menu_button = $menu
+}
+```
+
+Behavior implemented:
+1. Telegram sends updates to `/api/telegram/webhook`.
+2. On `/start`, `/app`, or `/webapp`, your bot replies with an inline Web App button.
+3. Button opens `TELEGRAM_WEB_APP_URL` inside Telegram.
+
 ## Role Behavior
 
 1. `owner`
