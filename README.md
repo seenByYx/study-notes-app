@@ -37,11 +37,18 @@ TELEGRAM_BOT_TOKEN=<from-botfather>
 TELEGRAM_BOT_USERNAME=<your-bot-username-without-@>
 TELEGRAM_WEB_APP_URL=https://study-notes-rho.vercel.app/telegram
 TELEGRAM_WEBHOOK_SECRET=<long-random-secret>
-GOOGLE_SERVICE_ACCOUNT_JSON=<single-line-json-for-service-account>
 GOOGLE_DRIVE_ROOT_FOLDER_ID=<drive-root-folder-id>
 GOOGLE_DRIVE_PUBLIC=true
 # optional: restrict who can upload files via bot
 TELEGRAM_ALLOWED_CHAT_IDS=123456789,987654321
+
+# Drive auth option A (recommended when service-account keys are blocked):
+GOOGLE_DRIVE_CLIENT_ID=<oauth-client-id>
+GOOGLE_DRIVE_CLIENT_SECRET=<oauth-client-secret>
+GOOGLE_DRIVE_REFRESH_TOKEN=<offline-refresh-token>
+
+# Drive auth option B (optional fallback):
+# GOOGLE_SERVICE_ACCOUNT_JSON=<single-line-json-for-service-account>
 ```
 
 Webhook endpoint used by this project:
@@ -74,8 +81,10 @@ Behavior implemented:
 2. On `/start`, `/app`, or `/webapp`, your bot replies with an inline Web App button.
 3. Button opens `TELEGRAM_WEB_APP_URL` inside Telegram.
 4. On `/upload`, bot starts guided flow and asks scope/key fields one by one.
-5. After metadata answers, bot asks for document and accepts only `.pdf` and `.pptx`.
-6. Bot uploads to Google Drive folders and creates note record in MongoDB.
+5. Subject step shows existing subjects as Telegram buttons.
+6. If required subject is missing, use `Add new subject` button and enter new subject name/key.
+7. After metadata answers, bot asks for document and accepts only `.pdf` and `.pptx`.
+8. Bot uploads to Google Drive folders and creates note record in MongoDB.
 
 Upload commands:
 ```text

@@ -9,6 +9,7 @@ const VALID_MIME_TYPES = new Set([
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 ]);
 const VALID_EXTENSIONS = [".pdf", ".pptx"];
+const BTN_ADD_SUBJECT = "Add new subject";
 
 function getRequiredEnv(name) {
   const value = process.env[name];
@@ -96,6 +97,95 @@ function getSemesterSubjects(courseKey, semesterKey) {
   return catalog.courses[courseKey]?.semesters?.[semesterKey]?.subjects || [];
 }
 
+function customSubjectCollection(db) {
+  return db.collection("telegram_custom_subjects");
+}
+
+function chunkButtons(items, size = 3) {
+  const rows = [];
+  for (let i = 0; i < items.length; i += size) {
+    rows.push(items.slice(i, i + size).map((item) => ({ text: item })));
+  }
+  return rows;
+}
+
+function buildReplyKeyboard(options) {
+  if (!options.length) return undefined;
+  return {
+    keyboard: chunkButtons(options),
+    resize_keyboard: true,
+    one_time_keyboard: true,
+  };
+}
+
+function subjectKeyFromInput(input) {
+  return String(input || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+async function getCustomSubjects(db, filter) {
+  return customSubjectCollection(db).find(filter).toArray();
+}
+
+async function listAvailableSubjects(db, data) {
+  const map = new Map();
+
+  if (data.scope === "class") {
+    getClassSubjects(data.classKey).forEach((s) => map.set(s.key, s.label || s.key));
+    const custom = await getCustomSubjects(db, {
+      scope: "class",
+      classKey: data.classKey,
+    });
+    custom.forEach((s) => map.set(s.key, s.label || s.key));
+  } else {
+    getSemesterSubjects(data.courseKey, data.semesterKey).forEach((s) => map.set(s.key, s.label || s.key));
+    const custom = await getCustomSubjects(db, {
+      scope: "course",
+      courseKey: data.courseKey,
+      semesterKey: data.semesterKey,
+    });
+    custom.forEach((s) => map.set(s.key, s.label || s.key));
+  }
+
+  return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
+}
+
+async function createCustomSubject(db, data, input) {
+  const key = subjectKeyFromInput(input);
+  if (!key || key.length < 2) return null;
+
+  const doc =
+    data.scope === "class"
+      ? {
+          scope: "class",
+          classKey: data.classKey,
+          key,
+          label: String(input || "").trim() || key,
+          createdAt: new Date(),
+        }
+      : {
+          scope: "course",
+          courseKey: data.courseKey,
+          semesterKey: data.semesterKey,
+          key,
+          label: String(input || "").trim() || key,
+          createdAt: new Date(),
+        };
+
+  await customSubjectCollection(db).updateOne(
+    data.scope === "class"
+      ? { scope: "class", classKey: data.classKey, key }
+      : { scope: "course", courseKey: data.courseKey, semesterKey: data.semesterKey, key },
+    { $set: doc },
+    { upsert: true }
+  );
+
+  return key;
+}
+
 async function getSession(db, chatId, userId) {
   return sessionCollection(db).findOne({ chatId: String(chatId), userId: String(userId) });
 }
@@ -138,14 +228,19 @@ function buildSemesterPrompt(courseKey) {
   return `Enter semester key for ${courseKey}:\n${semesters.join(", ")}`;
 }
 
-function buildSubjectPromptForClass(classKey) {
-  const subjects = getClassSubjects(classKey).map((s) => s.key);
-  return `Enter subject key for ${classKey}:\n${subjects.join(", ")}`;
-}
+function buildSubjectPromptMessage(pathLabel, subjects) {
+  if (!subjects.length) {
+    return {
+      text: `No subjects found for ${pathLabel}.\nTap "${BTN_ADD_SUBJECT}" to create one.`,
+      reply_markup: buildReplyKeyboard([BTN_ADD_SUBJECT]),
+    };
+  }
 
-function buildSubjectPromptForCourse(courseKey, semesterKey) {
-  const subjects = getSemesterSubjects(courseKey, semesterKey).map((s) => s.key);
-  return `Enter subject key for ${courseKey}/${semesterKey}:\n${subjects.join(", ")}`;
+  const keys = subjects.map((s) => s.key);
+  return {
+    text: `Choose subject key for ${pathLabel}:`,
+    reply_markup: buildReplyKeyboard([...keys, BTN_ADD_SUBJECT]),
+  };
 }
 
 async function insertNoteDoc({ classification, driveLink, title, chapter, noteKind, uploader }) {
@@ -215,7 +310,9 @@ async function processFlowText(db, message, session, text) {
 
     const nextData = { ...data, classKey: value };
     await upsertSession(db, chatId, userId, "await_subject_key", nextData);
-    await telegramRequest("sendMessage", { chat_id: chatId, text: buildSubjectPromptForClass(value) });
+    const subjects = await listAvailableSubjects(db, nextData);
+    const prompt = buildSubjectPromptMessage(value, subjects);
+    await telegramRequest("sendMessage", { chat_id: chatId, ...prompt });
     return true;
   }
 
@@ -242,33 +339,58 @@ async function processFlowText(db, message, session, text) {
 
     const nextData = { ...data, semesterKey: value };
     await upsertSession(db, chatId, userId, "await_subject_key", nextData);
-    await telegramRequest("sendMessage", { chat_id: chatId, text: buildSubjectPromptForCourse(data.courseKey, value) });
+    const subjects = await listAvailableSubjects(db, nextData);
+    const prompt = buildSubjectPromptMessage(`${data.courseKey}/${value}`, subjects);
+    await telegramRequest("sendMessage", { chat_id: chatId, ...prompt });
     return true;
   }
 
   if (session.step === "await_subject_key") {
-    if (data.scope === "class") {
-      const valid = new Set(getClassSubjects(data.classKey).map((s) => s.key));
-      if (!valid.has(value)) {
-        await telegramRequest("sendMessage", {
-          chat_id: chatId,
-          text: `Invalid subject key.\n${buildSubjectPromptForClass(data.classKey)}`,
-        });
-        return true;
-      }
-    } else {
-      const valid = new Set(getSemesterSubjects(data.courseKey, data.semesterKey).map((s) => s.key));
-      if (!valid.has(value)) {
-        await telegramRequest("sendMessage", {
-          chat_id: chatId,
-          text: `Invalid subject key.\n${buildSubjectPromptForCourse(data.courseKey, data.semesterKey)}`,
-        });
-        return true;
-      }
+    if (lower === BTN_ADD_SUBJECT.toLowerCase()) {
+      await upsertSession(db, chatId, userId, "await_new_subject_key", data);
+      await telegramRequest("sendMessage", {
+        chat_id: chatId,
+        text: "Enter new subject name/key (example: accountancy)",
+      });
+      return true;
     }
 
-    await upsertSession(db, chatId, userId, "await_chapter", { ...data, subjectKey: value });
+    const subjects = await listAvailableSubjects(db, data);
+    const valid = new Set(subjects.map((s) => s.key));
+    const normalizedValue = subjectKeyFromInput(value);
+    const selectedKey = valid.has(value) ? value : normalizedValue;
+    if (!valid.has(selectedKey)) {
+      const prompt = buildSubjectPromptMessage(
+        data.scope === "class" ? data.classKey : `${data.courseKey}/${data.semesterKey}`,
+        subjects
+      );
+      await telegramRequest("sendMessage", {
+        chat_id: chatId,
+        text: `Invalid subject key.\n${prompt.text}`,
+        reply_markup: prompt.reply_markup,
+      });
+      return true;
+    }
+
+    await upsertSession(db, chatId, userId, "await_chapter", { ...data, subjectKey: selectedKey });
     await telegramRequest("sendMessage", { chat_id: chatId, text: "Enter chapter/unit (example: Chapter 3)" });
+    return true;
+  }
+
+  if (session.step === "await_new_subject_key") {
+    const newKey = await createCustomSubject(db, data, value);
+    if (!newKey) {
+      await telegramRequest("sendMessage", {
+        chat_id: chatId,
+        text: "Invalid subject name. Try letters/numbers only (example: accountancy).",
+      });
+      return true;
+    }
+    await upsertSession(db, chatId, userId, "await_chapter", { ...data, subjectKey: newKey });
+    await telegramRequest("sendMessage", {
+      chat_id: chatId,
+      text: `Subject saved as "${newKey}".\nEnter chapter/unit (example: Chapter 3)`,
+    });
     return true;
   }
 

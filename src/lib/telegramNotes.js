@@ -133,16 +133,28 @@ export function classifyFromText({ caption, fileName }) {
 }
 
 function getDriveClient() {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error("Missing GOOGLE_SERVICE_ACCOUNT_JSON env");
+  const rawServiceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (rawServiceAccount) {
+    const credentials = JSON.parse(rawServiceAccount);
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ["https://www.googleapis.com/auth/drive"],
+    });
+    return google.drive({ version: "v3", auth });
+  }
 
-  const credentials = JSON.parse(raw);
-  const auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: ["https://www.googleapis.com/auth/drive"],
-  });
+  const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error(
+      "Missing Drive auth env. Set GOOGLE_SERVICE_ACCOUNT_JSON, or GOOGLE_DRIVE_CLIENT_ID + GOOGLE_DRIVE_CLIENT_SECRET + GOOGLE_DRIVE_REFRESH_TOKEN"
+    );
+  }
 
-  return google.drive({ version: "v3", auth });
+  const oauth2 = new google.auth.OAuth2(clientId, clientSecret);
+  oauth2.setCredentials({ refresh_token: refreshToken });
+  return google.drive({ version: "v3", auth: oauth2 });
 }
 
 async function findFolderByName(drive, parentId, folderName) {
