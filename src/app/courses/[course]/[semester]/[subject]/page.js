@@ -75,6 +75,7 @@ export default function CourseSubjectPage() {
         courseKey={courseKey}
         semesterKey={semesterKey}
         subjectKey={subjectKey}
+        allowManage
       />
 
       <CommentsBoard

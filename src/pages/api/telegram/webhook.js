@@ -517,8 +517,15 @@ async function processDocumentMessage(db, message, session) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === "GET") {
+    return res.status(200).json({
+      ok: true,
+      message: "Telegram webhook endpoint is active. Open the mini app URL, not this API route.",
+    });
+  }
+
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({ message: "Method not allowed. Telegram should call this endpoint using POST." });
   }
 
   try {

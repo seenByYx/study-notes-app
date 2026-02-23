@@ -149,6 +149,8 @@ export default function NotesBoard({
   };
 
   const deleteNote = async (id) => {
+    const confirmed = window.confirm("Delete this uploaded note? This cannot be undone.");
+    if (!confirmed) return;
     setError("");
     setMessage("");
     const previous = notes;

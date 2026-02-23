@@ -32,6 +32,7 @@ export default function ClassSubjectPage() {
         scope="class"
         classKey={classKey}
         subjectKey={subjectKey}
+        allowManage
       />
 
       <CommentsBoard
