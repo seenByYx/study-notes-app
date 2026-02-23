@@ -16,6 +16,7 @@
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.4.7",
     "firebase": "^11.4.0",
+    "googleapis": "^144.0.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.476.0",
     "mongodb": "^5.9.2",
