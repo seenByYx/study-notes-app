@@ -19,6 +19,7 @@ export default async function handler(req, res) {
   try {
     const db = await connectToDB();
     const subjects = db.collection("custom_subjects");
+    const legacySubjects = db.collection("telegram_custom_subjects");
 
     if (req.method === "GET") {
       const scope = normalizeScope(req.query.scope);
@@ -37,8 +38,20 @@ export default async function handler(req, res) {
           ? { scope, classKey, courseKey: null, semesterKey: null }
           : { scope, classKey: null, courseKey, semesterKey };
 
-      const items = await subjects.find(query).sort({ label: 1 }).toArray();
-      return res.status(200).json({ subjects: items.map((item) => ({ key: item.key, label: item.label })) });
+      const [items, legacyItems] = await Promise.all([
+        subjects.find(query).sort({ label: 1 }).toArray(),
+        legacySubjects.find(query).sort({ label: 1 }).toArray(),
+      ]);
+
+      const map = new Map();
+      [...items, ...legacyItems].forEach((item) => {
+        if (!item?.key) return;
+        if (!map.has(item.key)) {
+          map.set(item.key, { key: item.key, label: item.label || item.key });
+        }
+      });
+
+      return res.status(200).json({ subjects: Array.from(map.values()) });
     }
 
     if (req.method === "POST") {

@@ -98,7 +98,7 @@ function getSemesterSubjects(courseKey, semesterKey) {
 }
 
 function customSubjectCollection(db) {
-  return db.collection("telegram_custom_subjects");
+  return db.collection("custom_subjects");
 }
 
 function chunkButtons(items, size = 3) {
